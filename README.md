@@ -25,9 +25,9 @@ See the [sunpy documenation](http://sunpy.org) for details of how to install sun
 
 Contains a jupyter notebook that demonstrates how to generate a pointing location and *NuSTAR* roll for a given observation. 
 
-### solar_convert:
+### convert_to_solar:
 
-Work in progress. Empty. Will eventually contain the code to convert the solar observations into heliophysics coordinates.
+Contains code to convert the output of nupipeline into heliophysics coordinates. See the jupyter notebook for documentation and an example. Also has a standalone python script to convert individual files.
 
 ### solar_analysis:
 
