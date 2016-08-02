@@ -22,7 +22,7 @@ import sunpy.map
 
 import numpy as np
 
-scriptname='nustar_make_sunpu_map.py'
+scriptname='nustar_make_sunpy_map.py'
 
 
 
