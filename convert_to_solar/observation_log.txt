@@ -1,0 +1,8 @@
+20201001001 - AR2565_1
+20201002001 - AR2565_2 - Some data loss during this orbit.
+20201003001 - AR2565_3 - Lost first 40 minutes of the orbit.
+20201004001 - AR2565_4
+
+20201005001 - Slew to disk center and dwell
+20201006001 - East limb
+
