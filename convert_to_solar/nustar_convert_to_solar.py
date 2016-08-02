@@ -101,7 +101,7 @@ def main(argv):
         return sun_pos, sun_np;
 
 # How often you want to update the solar ephemeris:
-    tstep = 5. * u.s
+#    tstep = 5. * u.s
     last_met = met[0] - tstep * 2.
     last_i = 0
 
@@ -129,14 +129,16 @@ def main(argv):
         # From here on we do things for every photon:
         
         ph_pos = np.array([ra_x[i].value, dec_y[i].value]) * u.deg
-        offset = sun_pos - ph_pos
+        offset = ph_pos - sun_pos
 
-    # Account for East->West conversion for +X direction in heliophysics coords
-        offset = offset*[-1., 1.]
-        
+
         
         # Project the offset onto the Sun
         delta_offset = ((np.dot(offset, rotMatrix)).to(u.arcsec))
+        
+        # Account for East->West conversion for +X direction in heliophysics coords
+        delta_offset = delta_offset*[-1., 1.]
+
         sun_x[i] = delta_offset[0]
         sun_y[i] = delta_offset[1]
 
@@ -173,11 +175,8 @@ def main(argv):
 
 
 
-    out_sun_x=(sun_x / delx) + x0
+    out_sun_x=(-1.0)*(sun_x / delx) + x0
     out_sun_y=(sun_y / dely) + y0
-
-    newdelx = delx.to(u.arcsec).value
-    newdely = dely.to(u.arcsec).value
 
 
     tbldata['X'] = out_sun_x
@@ -187,7 +186,7 @@ def main(argv):
 
     hdr['TCRVL'+xval] = 0.
     hdr['TCRPX'+xval] = x0
-    hdr['TCDLT'+xval] = delx.to(u.arcsec).value
+    hdr['TCDLT'+xval] = -1.0 * delx.to(u.arcsec).value
     hdr['TLMAX'+xval] = maxX
     hdr['TCRVL'+yval] = 0.
     hdr['TCRPX'+yval] = x0
