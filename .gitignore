@@ -6,3 +6,11 @@ convert_to_solar/july_2016_quicklook.ipynb
 
 
 convert_to_solar/quicklook_map.png
+
+convert_to_solar/observation_log.txt
+
+convert_to_solar/run_all_convert.sh
+
+convert_to_solar/run_all_maps.sh
+
+solar_movie/NuSTAR_solar_movie.ipynb
