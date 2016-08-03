@@ -3,19 +3,9 @@
 import sys, getopt, os
 from os.path import *
 
-import matplotlib.colors as colors
-from matplotlib.colors import LogNorm
-
-
-
 from astropy.io import fits
 import astropy.time
 import astropy.units as u
-from astropy.coordinates import get_sun
-
-from pylab import figure, cm
-
-
 
 from sunpy import sun
 import sunpy.map
@@ -120,7 +110,13 @@ def main(argv):
 
 	x = evtdata['X'][goodinds]
 	y = evtdata['Y'][goodinds]
+	met = evtdata['TIME'][goodinds]*u.s
 
+	# Conver the NuSTAR epoch times to astropy datetime objects
+	mjdref=hdr['MJDREFI']
+	mid_obs_time = astropy.time.Time(mjdref*u.d+met.mean(), format = 'mjd')
+
+    
 	# Use the native binning for now
 
 	# Assume X and Y are the same size
@@ -129,23 +125,37 @@ def main(argv):
 	bins = (max_x - min_x) / (resample)
 
 	H, yedges, xedges = np.histogram2d(y, x, bins=bins, range = [[min_y,max_y], [min_x, max_x]])
+	
+	dict_header = {
+        "DATE-OBS": mid_obs_time.iso,
+        "CDELT1": scale,
+        "NAXIS1": bins,
+        "CRVAL1": 0.,
+        "CRPIX1": bins*0.5,
+        "CUNIT1": "arcsec",
+        "CTYPE1": "HPLN-TAN",
+        "CDELT2": scale,
+        "NAXIS2": bins,
+        "CRVAL2": 0.,
+        "CRPIX2": bins*0.5 + 0.5,
+        "CUNIT2": "arcsec",
+        "CTYPE2": "HPLT-TAN",
+        "HGLT_OBS": 0,
+        "HGLN_OBS": 0,
+        "RSUN_OBS": sun.solar_semidiameter_angular_size(mid_obs_time).value,
+        "RSUN_REF": sun.constants.radius.value
+    }
 
-	meta_nustar = {}
-	meta_nustar['cdelt1'] = scale
-	meta_nustar['cunit1'] = 'arcsec'
-	meta_nustar['cdelt2'] = scale
-	meta_nustar['cunit2'] = 'arcsec'
-
-
-	nustar_map = sunpy.map.Map((H, meta_nustar))
-	nustar_map.plot_settings['norm'] = colors.LogNorm(0.01, nustar_map.max())
-	nustar_map.plot_settings['cmap'] = cm.get_cmap('BrBG')
-
+#        "DSUN_OBS": sun.sunearth_distance(mid_obs_time) * sun.constants.au.value
+    
+	header = sunpy.map.MapMeta(dict_header)
+	nustar_map = sunpy.map.Map(H, header)
 
 	# # Make the new filename:
 	(sfile, ext)=splitext(infile)
 	outfile=sfile+'_map.fits'
 	print("Dumping to: ", outfile)
+
 	# Remove output file if necessary
 	if isfile(outfile):
 		print(outfile, 'exists! Removing old version...')
