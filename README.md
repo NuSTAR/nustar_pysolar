@@ -1,4 +1,4 @@
-# Nustar Solar Repo
+# *NuSTAR* Solar Repo
 
 ## Overview:
 
@@ -19,6 +19,8 @@ We recommend using [Anaconda](https://www.continuum.io/downloads) for installati
 
 See the [sunpy documenation](http://sunpy.org) for details of how to install sunpy via conda.
 
+See Iain Hannah's overview figures for the solar observations (made using SSWIDL) [here](http://ianan.github.io/nsigh_all/).
+
 ## Contents: 
 
 ### setup_pointing:
@@ -29,13 +31,13 @@ Contains a jupyter notebook that demonstrates how to generate a pointing locatio
 
 Contains code to convert the output of nupipeline into heliophysics coordinates. See the jupyter notebook for documentation and an example. Also has a standalone python script to convert individual files.
 
+This directory also contains a jupyter notebook and associated standalone script to produce sunpy-compatible map files.
+
 ### solar_analysis:
 
-Empty. Will probably contain sunpy specific (or [SolarSoft](http://www.lmsal.com/solarsoft/) equivalent) code for making maps, interfacing with other observatories, etc.
+Empty. Will probably contain sunpy specific (or [SolarSoft](http://www.lmsal.com/solarsoft/) equivalent) example code to make pretty figures, etc.
 
-### offset_files:
 
-Directory tree that contains the offets for each of the sequence IDs and CHU combinations. This (may?) be updated as we get better alignment between NuSTAR and other missions. Note that the NuSTAR absolute reconstruction is usually only good to an arcminute or so for solar observations.
 
 
 
