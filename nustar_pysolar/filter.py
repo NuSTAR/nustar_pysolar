@@ -1,5 +1,4 @@
 import numpy as np
-import logging
 
 
 
@@ -22,8 +21,6 @@ def bad_pix(evtdata, fpm='A'):
 		Index of evtdata that passes the filtering.
 	"""
     
-	logging.basicConfig(filename='nustar_pysolar.log', level=logging.INFO)
-	logging.info('Started')
 
 	
 	# Hot pixel filters
@@ -45,7 +42,6 @@ def bad_pix(evtdata, fpm='A'):
 								(evtdata['DET_ID'] == 3) & (evtdata['RAWX'] == 24) & (evtdata['RAWY'] == 4) | 
 								(evtdata['DET_ID'] == 3) & (evtdata['RAWX'] == 25) & (evtdata['RAWY'] == 5) ) )
 	else:
-		logging.info("Filtering bad pixels for FPMB.")
 		pix_filter = np.invert( ( (evtdata['DET_ID'] == 0) & (evtdata['RAWX'] == 24) & (evtdata['RAWY'] == 24)) )
 
 
