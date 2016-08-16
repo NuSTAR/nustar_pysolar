@@ -29,11 +29,11 @@ This is a set of python modules that can be used to convert the *NuSTAR* astroph
 
 1. Clone the project from github:
 
-    $ git clone https://github.com/NuSTAR/nustar_pysolar.git
+>    git clone https://github.com/NuSTAR/nustar_pysolar.git
 
 2. Go back to nustar_pysolar project directory and execute:
 
-    $ python setup.py install
+>    python setup.py install
 
 
 ### Documentation
@@ -42,11 +42,14 @@ TBD
 
 ### notebooks
 
-Contains several jupyter notebooks that demonstrates how to generate a pointing location and *NuSTAR* roll for a given observation. 
+Contains several jupyter notebooks that demonstrates how to generate a pointing location and *NuSTAR* roll for a given observation. This series of notebooks should result in you have a sunpy-style map object that can then be combined with other sunpy objects (AIA, etc) for making pretty pictures.
 
-The proper order is 
+The proper order is:
 
 1. [Observation Report](notebooks/Observation_Report.ipynb)
+2. [Convert Example](notebooks/Convert_Example.ipynb)
+3. [Map Example](notebooks/Map_Example.ipynb)
+
 
 
 
