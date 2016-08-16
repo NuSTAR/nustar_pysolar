@@ -1,16 +1,67 @@
+# Compiled files
+*.py[cod]
+*.a
+*.o
+*.so
+__pycache__
+
+# Ignore .c files by default to avoid including generated code. If you want to
+# add a non-generated .c extension, use `git add -f filename.c`.
+*.c
+
+# Other generated files
+*/version.py
+*/cython_version.py
+htmlcov
+.coverage
+MANIFEST
+.ipynb_checkpoints
+
+# Sphinx
+docs/api
+docs/_build
+
+# Eclipse editor project files
+.project
+.pydevproject
+.settings
+
+# Pycharm editor project files
+.idea
+
+# Packages/installer info
+*.egg
+*.egg-info
+dist
+build
+eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+distribute-*.tar.gz
+
+# Other
+.cache
+.tox
+.*.sw[op]
+*~
+
+# Mac OSX
+.DS_Store
+
+
+
+## NuSTAR_pysolar specific options
 */data/**
 .ipynb*
 
 convert_to_solar/july_2016_quicklook.ipynb
-
-
-
 convert_to_solar/quicklook_map.png
-
 convert_to_solar/observation_log.txt
-
 convert_to_solar/run_all_convert.sh
-
 convert_to_solar/run_all_maps.sh
-
 solar_movie/NuSTAR_solar_movie.ipynb
+
