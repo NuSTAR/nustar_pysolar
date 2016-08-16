@@ -27,11 +27,11 @@ See Iain Hannah's overview figures for the solar observations (made using SSWIDL
 
 This is a set of python modules that can be used to convert the *NuSTAR* astrophysics data to heliocentric coordinates.
 
-1. Clone the project from github
+1. Clone the project from github:
 
     $ git clone https://github.com/NuSTAR/nustar_pysolar.git
 
-2. Go back to nustar_pysolar project directory and execute::
+2. Go back to nustar_pysolar project directory and execute:
 
     $ python setup.py install
 
@@ -46,7 +46,7 @@ Contains several jupyter notebooks that demonstrates how to generate a pointing 
 
 The proper order is 
 
-1. (Observation Report)[notebooks/Observation_Report.ipynb]
+1. [Observation Report](notebooks/Observation_Report.ipynb)
 
 
 
