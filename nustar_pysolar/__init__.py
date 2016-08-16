@@ -14,6 +14,6 @@ from ._astropy_init import *
 if not _ASTROPY_SETUP_:
 	from . import filter 
 	from . import map
-
+	from . import convert
 
 

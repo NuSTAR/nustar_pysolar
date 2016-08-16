@@ -8,7 +8,7 @@ def bad_pix(evtdata, fpm='A'):
 	
 	Parameters
 	----------
-    evtdata: FITS data structure
+    evtdata: FITS data class
 		This should be an hdu.data structure from a NuSTAR FITS file.
 
     fpm: {"FPMA" | "FPMB"}
@@ -59,7 +59,7 @@ def by_energy(evtdata, energy_low=2.5, energy_high=10.):
 	
 	Parameters
 	----------
-	evtdata: FITS dat structure
+	evtdata: FITS data class
 		This should be an hdu.data structure from a NuSTAR FITS file.
 		
 	energy_low: float
@@ -83,7 +83,7 @@ def gradezero(evtdata):
 		
 	Parameters
 	----------
-	evtdata: FITS dat structure
+	evtdata: FITS data class
 		This should be an hdu.data structure from a NuSTAR FITS file.
 		
 	Returns
@@ -101,9 +101,36 @@ def gradezero(evtdata):
 	
 	return goodinds
 
-def event_filter(evtdata, fpm='A',
+def event_filter(evtdata, fpm='FPMA',
 	energy_low=2.5, energy_high=10):
+	""" All in one filter module. By default applies an energy cut, 
+		selects only events with grade == 0, and removes known hot pixel.
+		
+		Note that this module returns a cleaned eventlist rather than
+		the indices to the cleaned events.
+
+	Parameters
+	----------
+	evtdata: FITS data structure
+		This should be an hdu.data structure from a NuSTAR FITS file.
 	
+    fpm: {"FPMA" | "FPMB"}
+		Which FPM you're filtering on. Defaults to FPMA.
+		
+	energy_low: float
+		Low-side energy bound for the map you want to produce (in keV).
+		Defaults to 2.5 keV.
+
+    energy_high: float
+		High-side energy bound for the map you want to produce (in keV).
+		Defaults to 10 keV.
+		
+	Returns
+    -------
+
+	cleanevt: FITS data class.
+		This is the subset of evtdata that pass the data selection cuts.
+	"""
 	goodinds = bad_pix(evtdata, fpm=fpm)
 	evt_badfilter = evtdata[goodinds]
 	goodinds = by_energy(evt_badfilter,
