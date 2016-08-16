@@ -35,7 +35,7 @@ This is a set of python modules that can be used to convert the *NuSTAR* astroph
 
 >    git clone https://github.com/NuSTAR/nustar_pysolar.git
 
-2. Go back to nustar_pysolar project directory and execute:
+2. Go to the nustar_pysolar project directory and execute:
 
 >    python setup.py install
 
@@ -54,6 +54,11 @@ The proper order is:
 2. [Convert Example](notebooks/Convert_Example.ipynb)
 3. [Map Example](notebooks/Map_Example.ipynb)
 
+## How to get *NuSTAR* solar data
+
+You can search the [*NuSTAR* table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dnumaster&Action=More+Options) at the HEASARC, using SOL in the obs_type search bar to locate all of the *NuSTAR* solar observations. Any data that are public can be downloaded and reprocessed for solar work.
+
+If you have data that you'd like to see that aren't public let, let me know.
 
 
 
