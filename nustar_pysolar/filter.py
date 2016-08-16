@@ -3,7 +3,7 @@ import logging
 
 
 
-def filter_events(evtdata, fpm='A',energy_low=2.5, energy_high=10.):
+def bad_pix(evtdata, fpm='A'):
 	"""Do some basic filtering on known bad pixels.
 	
 	Parameters
@@ -14,11 +14,6 @@ def filter_events(evtdata, fpm='A',energy_low=2.5, energy_high=10.):
     fpm: {"FPMA" | "FPMB"}
 		Which FPM you're filtering on. Assumes A if not set.
 
-    energy_low: float
-		Low-side energy bound for the map you want to produce (in keV).
-
-    energy_high: float
-		High-side energy bound for the map you want to produce (in keV).
 
 	Returns
     -------
@@ -30,12 +25,6 @@ def filter_events(evtdata, fpm='A',energy_low=2.5, energy_high=10.):
 	logging.basicConfig(filename='nustar_pysolar.log', level=logging.INFO)
 	logging.info('Started')
 
-	pilow = (energy_low - 1.6) / 0.04
-	pihigh = (energy_high - 1.6) / 0.04
-
-	# Grade filter
-	grade_filter = ( evtdata['GRADE'] == 0)
-	pi_filter = ( ( evtdata['PI']>pilow ) &  ( evtdata['PI']<pihigh))
 	
 	# Hot pixel filters
 	
@@ -60,13 +49,56 @@ def filter_events(evtdata, fpm='A',energy_low=2.5, energy_high=10.):
 		pix_filter = np.invert( ( (evtdata['DET_ID'] == 0) & (evtdata['RAWX'] == 24) & (evtdata['RAWY'] == 24)) )
 
 
-	inds = (grade_filter & pi_filter & pix_filter).nonzero()
+	inds = (pix_filter).nonzero()
 	goodinds=inds[0]
+	
+	return goodinds
+	
+def by_energy(evtdata, energy_low=2.5, energy_high=10.):
+	""" Apply energy filtering to the data.
+	
+	Parameters
+	----------
+	evtdata: FITS dat structure
+		This should be an hdu.data structure from a NuSTAR FITS file.
+		
+	energy_low: float
+		Low-side energy bound for the map you want to produce (in keV).
+		Defaults to 2.5 keV.
 
-	logging.info("Found: ", len(goodinds), " good counts.")
+    energy_high: float
+		High-side energy bound for the map you want to produce (in keV).
+		Defaults to 10 keV.
+	"""		
+	pilow = (energy_low - 1.6) / 0.04
+	pihigh = (energy_high - 1.6) / 0.04
+	pi_filter = ( ( evtdata['PI']>pilow ) &  ( evtdata['PI']<pihigh))
+	inds = (pi_filter).nonzero()
+	goodinds=inds[0]
+	
+	return goodinds
+	
+def gradezero(evtdata):
+	""" Only accept counts with GRADE==0.
+		
+	Parameters
+	----------
+	evtdata: FITS dat structure
+		This should be an hdu.data structure from a NuSTAR FITS file.
+		
+	Returns
+    -------
 
-	logging.info('Finished')
+	goodinds: iterable
+		Index of evtdata that passes the filtering.
+	"""
 
+	# Grade filter
+	
+	grade_filter = ( evtdata['GRADE'] == 0)
+	inds = (rade_filter).nonzerio()
+	goodinds = inds[0]
+	
 	return goodinds
 
 

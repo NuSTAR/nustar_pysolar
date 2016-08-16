@@ -12,5 +12,7 @@ from ._astropy_init import *
 
 # For egg_info test builds to pass, put package imports here.
 if not _ASTROPY_SETUP_:
-    from . import nustar_pysolar
+	from nustar_pysolar.filter import *
+
+
 
