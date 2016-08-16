@@ -23,20 +23,30 @@ See Iain Hannah's overview figures for the solar observations (made using SSWIDL
 
 ## Contents: 
 
-### setup_pointing:
+### nustar_pysolar
 
-Contains a jupyter notebook that demonstrates how to generate a pointing location and *NuSTAR* roll for a given observation. 
+This is a set of python modules that can be used to convert the *NuSTAR* astrophysics data to heliocentric coordinates.
 
-### convert_to_solar:
+1. Clone the project from github
 
-Contains code to convert the output of nupipeline into heliophysics coordinates. See the jupyter notebook for documentation and an example. Also has a standalone python script to convert individual files.
+    $ git clone https://github.com/NuSTAR/nustar_pysolar.git
 
-This directory also contains a jupyter notebook and associated standalone script to produce sunpy-compatible map files.
+2. Go back to nustar_pysolar project directory and execute::
 
-### solar_analysis:
+    $ python setup.py install
 
-Empty. Will probably contain sunpy specific (or [SolarSoft](http://www.lmsal.com/solarsoft/) equivalent) example code to make pretty figures, etc.
 
+### Documentation
+
+TBD
+
+### notebooks
+
+Contains several jupyter notebooks that demonstrates how to generate a pointing location and *NuSTAR* roll for a given observation. 
+
+The proper order is 
+
+1. (Observation Report)[notebooks/Observation_Report.ipynb]
 
 
 
