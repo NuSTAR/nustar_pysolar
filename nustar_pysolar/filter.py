@@ -96,9 +96,21 @@ def gradezero(evtdata):
 	# Grade filter
 	
 	grade_filter = ( evtdata['GRADE'] == 0)
-	inds = (rade_filter).nonzerio()
+	inds = (grade_filter).nonzero()
 	goodinds = inds[0]
 	
 	return goodinds
+
+def event_filter(evtdata, fpm='A',
+	energy_low=2.5, energy_high=10):
+	
+	goodinds = bad_pix(evtdata, fpm=fpm)
+	evt_badfilter = evtdata[goodinds]
+	goodinds = by_energy(evt_badfilter,
+						energy_low=energy_low, energy_high = energy_high)
+	evt_energy = evt_badfilter[goodinds]
+	goodinds = gradezero(evt_energy)
+	cleanevt = evt_energy[goodinds]
+	return cleanevt
 
 

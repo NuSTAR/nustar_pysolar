@@ -55,7 +55,7 @@ distribute-*.tar.gz
 
 
 ## NuSTAR_pysolar specific options
-*/data/**
+data/**
 .ipynb*
 
 convert_to_solar/july_2016_quicklook.ipynb
