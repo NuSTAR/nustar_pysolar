@@ -21,6 +21,10 @@ See the [sunpy documenation](http://sunpy.org) for details of how to install sun
 
 See Iain Hannah's overview figures for the solar observations (made using SSWIDL) [here](http://ianan.github.io/nsigh_all/).
 
+Interested in helping out or adding code? Feedback is great, report any problems via  `issues`_ page.
+
+If you have code you might want to contribute, get in touch with me to join the Slack group and/or issue a pull request.
+
 ## Contents: 
 
 ### nustar_pysolar
