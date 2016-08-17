@@ -28,7 +28,6 @@ def bad_pix(evtdata, fpm='A'):
 	# FPMA or FPMB
 	
 	if fpm.find('B') == -1 :
-		logging.info("Filtering bad pixels for FPMA.")
 		pix_filter = np.invert( ( (evtdata['DET_ID'] == 2) & (evtdata['RAWX'] == 16) & (evtdata['RAWY'] == 5) |
 								(evtdata['DET_ID'] == 2) & (evtdata['RAWX'] == 24) & (evtdata['RAWY'] == 22) |
 								(evtdata['DET_ID'] == 2) & (evtdata['RAWX'] == 27) & (evtdata['RAWY'] == 6) |

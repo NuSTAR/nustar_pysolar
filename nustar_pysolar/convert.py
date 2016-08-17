@@ -136,8 +136,8 @@ def to_solar(evtdata, hdr, **kwargs):
 
 
 	# Make output variaibles:
-	tbldata=evtdata.copy
-	outhdr = hdr.copy
+	tbldata=evtdata.copy()
+	outhdr = hdr.copy()
 
 	#  change to 0-3000 pixels using the same pixel size.
 	maxX = 3000
