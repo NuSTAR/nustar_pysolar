@@ -1,4 +1,4 @@
-# Nustar Solar Repo
+# *NuSTAR* Solar Repo
 
 ## Overview:
 
@@ -19,23 +19,47 @@ We recommend using [Anaconda](https://www.continuum.io/downloads) for installati
 
 See the [sunpy documenation](http://sunpy.org) for details of how to install sunpy via conda.
 
+See Iain Hannah's overview figures for the solar observations (made using SSWIDL) [here](http://ianan.github.io/nsigh_all/).
+
+Interested in helping out or adding code? Feedback is great, report any problems via  `issues`_ page.
+
+If you have code you might want to contribute, get in touch with me to join the Slack group and/or issue a pull request.
+
 ## Contents: 
 
-### setup_pointing:
+### nustar_pysolar
 
-Contains a jupyter notebook that demonstrates how to generate a pointing location and *NuSTAR* roll for a given observation. 
+This is a set of python modules that can be used to convert the *NuSTAR* astrophysics data to heliocentric coordinates.
 
-### convert_to_solar:
+1. Clone the project from github:
 
-Contains code to convert the output of nupipeline into heliophysics coordinates. See the jupyter notebook for documentation and an example. Also has a standalone python script to convert individual files.
+>    git clone https://github.com/NuSTAR/nustar_pysolar.git
 
-### solar_analysis:
+2. Go to the nustar_pysolar project directory and execute:
 
-Empty. Will probably contain sunpy specific (or [SolarSoft](http://www.lmsal.com/solarsoft/) equivalent) code for making maps, interfacing with other observatories, etc.
+>    python setup.py install
 
-### offset_files:
 
-Directory tree that contains the offets for each of the sequence IDs and CHU combinations. This (may?) be updated as we get better alignment between NuSTAR and other missions. Note that the NuSTAR absolute reconstruction is usually only good to an arcminute or so for solar observations.
+### Documentation
+
+TBD
+
+### notebooks
+
+Contains several jupyter notebooks that demonstrates how to generate a pointing location and *NuSTAR* roll for a given observation. This series of notebooks should result in you have a sunpy-style map object that can then be combined with other sunpy objects (AIA, etc) for making pretty pictures.
+
+The proper order is:
+
+1. [Observation Report](notebooks/Observation_Report.ipynb)
+2. [Convert Example](notebooks/Convert_Example.ipynb)
+3. [Map Example](notebooks/Map_Example.ipynb)
+
+## How to get *NuSTAR* solar data
+
+You can search the [*NuSTAR* table](https://heasarc.gsfc.nasa.gov/db-perl/W3Browse/w3table.pl?tablehead=name%3Dnumaster&Action=More+Options) at the HEASARC, using SOL in the obs_type search bar to locate all of the *NuSTAR* solar observations. Any data that are public can be downloaded and reprocessed for solar work.
+
+If you have data that you'd like to see that aren't public let, let me know.
+
 
 
 

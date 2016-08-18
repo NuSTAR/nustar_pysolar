@@ -3,39 +3,26 @@
 
 # syntax: run_pipe.sh INDIR
 if [ $# != 1 ] ; then
-    echo Syntax:  run_pipe.sh PATH_TO_OBSID
+    echo Syntax:  run_nupipeline_solar.sh PATH_TO_OBSID
     exit 1
 fi
 
 # Note, PATH_TO_OBSID is assumed to be relative to the current
 # directory:
-
 INDIR=$1
 
 
 # Set up your local NuSTAR science environment here:
-if [ -z "$NUSTARSETUP" ]; then
-    echo "Need to set the NUSTARSETUP environment variable!"
+if [ -z "$HEADAS" ]; then
+    echo "Need to initialize the HEASOFT first!"
     exit
 fi
-source $NUSTARSETUP
 
 OUTDIR=$INDIR/event_cl
 if [ ! -d $OUTDIR ]; then
 #    echo $OUTDIR needs to be produced
     mkdir -m 750 $OUTDIR
-#    chgrp nustar $OUTDIR
 fi
-
-
-# Set the pfiles to point to $INDIR/PID_pfiles
-# Assumes that INDIR is relative to the current directory
-LOCPFILES=${OUTDIR}/$$_pfiles
-if [ ! -d $LOCPFILES ]; then
-    mkdir $LOCPFILES
-fi
-export PFILES="$LOCPFILES;$HEADAS/syspfiles"
-
 
 # Assume that INDIR will be the complete path, and we only want the last bit
 # for the stem inputs:
@@ -52,7 +39,6 @@ ENTRYSTAGE=1
 EXITSTAGE=2
 
 type="STATUS==b0000xx00xx0xx000"
-
 hkevtexpr="STATUS==b0000xx00xx0xx000&&SHIELD==0&&GRADE.LE.26"
 
 echo
@@ -64,8 +50,8 @@ indir=$INDIR steminput=$STEMINPUTS \
 outdir=$OUTDIR \
 statusexpr=$type \
 hkevtexp=$hkevtexpr \
-runsplitsc=yes \
 entrystage=$ENTRYSTAGE exitstage=$EXITSTAGE \
+runsplitsc=yes \
 pntra=OBJECT pntdec=OBJECT"
 
 echo $cmd > $logfile 2>&1
