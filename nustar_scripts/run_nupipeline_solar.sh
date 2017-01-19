@@ -39,7 +39,6 @@ ENTRYSTAGE=1
 EXITSTAGE=2
 
 type="STATUS==b0000xx00xx0xx000"
-hkevtexpr="STATUS==b0000xx00xx0xx000&&SHIELD==0&&GRADE.LE.26"
 
 echo
 echo Running pipeline...
@@ -49,7 +48,6 @@ clobber=yes \
 indir=$INDIR steminput=$STEMINPUTS \
 outdir=$OUTDIR \
 statusexpr=$type \
-hkevtexp=$hkevtexpr \
 entrystage=$ENTRYSTAGE exitstage=$EXITSTAGE \
 runsplitsc=yes \
 pntra=OBJECT pntdec=OBJECT"
