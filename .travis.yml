@@ -1,27 +1,32 @@
-# We use C because conda manages our Python version
-language: c
+language: python
+python:
+  # We don't actually use the Travis Python, but this keeps it organized.
+  - "3.5"
+  
+  
+install:
+  - sudo apt-get update
+  # We do this conditionally because it saves us some downloading if the
+  # version is the same.
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  # Useful for debugging any issues with conda
+  - conda info -a
 
-# Setting sudo to false opts in to Travis-CI container-based builds.
-sudo: false
+  # Replace dep1 dep2 ... with your dependencies
+  - conda config --add channels conda-forge
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION sunpy
+  - source activate test-environment
 
+script:
+  # Your test script goes here
+  - python setup.py install
 
-# Configure the build environment. Global varibles are defined for all configurations.
-env:
-    global:
-        - PREVIOUS_NUMPY=1.10.4
-        - PYTHON_VERSION=2.7
-        - TEST_MODE='offline'
-        - NUMPY_VERSION='stable'
-        - ASTROPY_VERSION='stable'
-        - MAIN_CMD='python setup.py'
-        - CONDA_CHANNELS='astropy astropy-ci-extras conda-forge'
-        - CONDA_DEPENDENCIES='sunpy'
-        - PIP_DEPENDENCIES='suds-jurko sphinx-gallery'
-
-    matrix:
-        - PYTHON_VERSION=2.7 SETUP_CMD='egg_info' 
-        - PYTHON_VERSION=3.4 SETUP_CMD='egg_info'
-        - PYTHON_VERSION=3.5 SETUP_CMD='egg_info'
-        - PYTHON_VERSION=2.7 SETUP_CMD='test'
-        - PYTHON_VERSION=3.4 SETUP_CMD='test'
-        - PYTHON_VERSION=3.5 SETUP_CMD='test'
