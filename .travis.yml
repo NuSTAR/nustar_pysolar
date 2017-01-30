@@ -9,10 +9,10 @@ env:
         # The following versions are the 'default' for tests, unless
         # overidden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
-        - NUMPY_VERSION=stable
-        - SCIPY_VERSION=stable
-        - ASTROPY_VERSION=stable
-        - H5PY_VERSION=stable
+        - NUMPY_VERSION=1.11.3
+        - SCIPY_VERSION=0.18.1
+        - ASTROPY_VERSION=1.3
+        - SUNPY_VERSION=0.7.4
         - PIP_DEPENDENCIES=''
         - CONDA_CHANNELS='conda-forge'
         - MAIN_CMD='python setup.py'
