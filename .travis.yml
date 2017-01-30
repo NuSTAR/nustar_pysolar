@@ -1,4 +1,4 @@
- We use C because conda manages our Python version
+# We use C because conda manages our Python version
 language: c
 
 # Setting sudo to false opts in to Travis-CI container-based builds.
