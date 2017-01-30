@@ -3,30 +3,50 @@ python:
   # We don't actually use the Travis Python, but this keeps it organized.
   - "3.5"
   
-  
-install:
-  - sudo apt-get update
-  # We do this conditionally because it saves us some downloading if the
-  # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  # Useful for debugging any issues with conda
-  - conda info -a
 
-  # Replace dep1 dep2 ... with your dependencies
-  - conda config --add channels conda-forge
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION sunpy
-  - source activate test-environment
+env:
+    global:
+        # The following versions are the 'default' for tests, unless
+        # overidden underneath. They are defined here in order to save having
+        # to repeat them for all configurations.
+        - NUMPY_VERSION=stable
+        - SCIPY_VERSION=stable
+        - ASTROPY_VERSION=stable
+        - H5PY_VERSION=stable
+        - SETUP_CMD='test'
+        - PIP_DEPENDENCIES=''
+        - CONDA_CHANNELS='conda-forge'
+        - MAIN_CMD='python setup'
+        # For this package-template, we include examples of Cython modules,
+        # so Cython is required for testing. If your package does not include
+        # Cython code, you can set CONDA_DEPENDENCIES=''
+        - CONDA_DEPENDENCIES='sunpy numpy scipy astropy matplotlib'
+    matrix:
+        # Make sure that egg_info works without dependencies
+        - SETUP_CMD='egg_info'
+        # Try all python versions with the latest numpy
+        - SETUP_CMD='test'
+
+
+install:
+
+    # We now use the ci-helpers package to set up our testing environment.
+    # This is done by using Miniconda and then using conda and pip to install
+    # dependencies. Which dependencies are installed using conda and pip is
+    # determined by the CONDA_DEPDENDENCIES and PIP_DEPENDENCIES variables,
+    # which should be space-delimited lists of package names. See the README
+    # in https://github.com/astropy/ci-helpers for information about the full
+    # list of environment variables that can be used to customize your
+    # environment. In some cases, ci-helpers may not offer enough flexibility
+    # in how to install a package, in which case you can have additional
+    # commands in the install: section below.
+
+    - git clone git://github.com/astropy/ci-helpers.git
+    - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
+    
+
 
 script:
   # Your test script goes here
-  - python setup.py install
+  - $MAIN_CMD $SETUP_CMD 
 
