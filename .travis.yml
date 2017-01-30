@@ -22,7 +22,7 @@ env:
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='sunpy numpy scipy astropy matplotlib'
+        - CONDA_DEPENDENCIES='numpy scipy astropy matplotlib sunpy'
     matrix:
         # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
