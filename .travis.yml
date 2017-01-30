@@ -11,7 +11,8 @@ env:
         # to repeat them for all configurations.
         - NUMPY_VERSION=1.11.3
         - SCIPY_VERSION=0.18.1
-        - ASTROPY_VERSION=1.3
+        # Astropy 1.2.1 for now since that's what required for Sunpy
+        - ASTROPY_VERSION=1.2.1
         - SUNPY_VERSION=0.7.5
         - PIP_DEPENDENCIES=''
         - CONDA_CHANNELS='conda-forge'
