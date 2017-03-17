@@ -9,6 +9,7 @@ Contents:
    filter
    convert
    map
+   planning
 
 
 Indices and tables
