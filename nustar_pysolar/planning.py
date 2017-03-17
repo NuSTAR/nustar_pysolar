@@ -10,6 +10,7 @@ from sunpy import sun
 import numpy as np
 from astropy import units as u
 
+import os
 
 
 def get_sky_position(time, offset):
@@ -149,6 +150,11 @@ def download_occultation_times(outdir='./'):
     if not(outdir.endswith('/')):
         outdir+'/'
     
+    # Make sure the directory exists and create one if not.
+    directory = os.path.dirname(outdir)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        
     # Get yesterday's file...
     today = date.today() - timedelta(1) 
     year = str(today.timetuple().tm_year)

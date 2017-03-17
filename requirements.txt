@@ -2,4 +2,5 @@ numpy
 scipy
 matplotlib
 sunpy
-wget
+wget=2.2
+sphinx
