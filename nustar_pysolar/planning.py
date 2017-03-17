@@ -10,7 +10,6 @@ from sunpy import sun
 import numpy as np
 from astropy import units as u
 
-import os
 
 
 def get_sky_position(time, offset):
@@ -145,7 +144,8 @@ def download_occultation_times(outdir='./'):
     the further ahead you go.
     
     """
-    
+    import os
+
     # Make sure you've got a trailing slash...
     if not(outdir.endswith('/')):
         outdir+'/'
