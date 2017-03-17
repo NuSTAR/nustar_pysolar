@@ -1,8 +1,14 @@
 from sunpy.time import parse_time
 from datetime import timedelta
 from datetime import date
-    
 
+from astropy.time import Time
+from astropy.coordinates import get_sun
+from astropy.coordinates import SkyCoord
+
+from sunpy import sun
+import numpy as np
+from astropy import units as u
 
 
 
@@ -42,8 +48,8 @@ def get_sky_position(time, offset):
     # Convert the date into something that's usable by astropy.
 
 
-    start_date = sunpy.time.parse_time(time)
-    astro_time = astropy.time.Time(start_date)
+    start_date = parse_time(time)
+    astro_time = Time(start_date)
     
     # Use astropy get_sun for Sun sky position.
     # sunpy has a similar function, but it may be giving a different
@@ -104,8 +110,8 @@ def get_nustar_roll(time, angle):
     
     """
         
-    start_date = sunpy.time.parse_time(time)
-    astro_time = astropy.time.Time(start_date)
+    start_date = parse_time(time)
+    astro_time = Time(start_date)
     # Get the solar north pole angle. cgs --> radians
     sun_np=sun.solar_north(t=time).deg * u.deg
         
@@ -297,7 +303,9 @@ def sunlight_periods(infile, tstart, tend):
     in_range = []
     set=0
     for pair in all_pairs:
-        if ( (pair[0] < checkstart) & (pair[1] > checkstart)):
+        dtmin = (pair[0] - checkstart)
+        dtmax = (pair[1] - checkstart)
+        if ( (pair[1] > checkstart) ):
             set=1
         if (set == 0):
             continue
