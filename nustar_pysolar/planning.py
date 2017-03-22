@@ -193,7 +193,7 @@ def _parse_timestamp(tstamp):
     
     year = parse_time(stub)
     hr, min, sec = time.split(':')
-    dt = timedelta(int(day), int(sec), 0, 0, int(min), int(hr))
+    dt = timedelta(int(day)-1, int(sec), 0, 0, int(min), int(hr))
 
     return year+dt;
 
@@ -248,6 +248,9 @@ def parse_occultations(infile):
         second = (fields[1].split('UTC'))[0].strip()
         dtsecond=_parse_timestamp(second)
 
+#        print(first, dtfirst)
+#        print(second, dtsecond)
+#        break
         # Since the file actually gives the start/stop times of going into
         # earthshadow, we actually want the "In Sun" times, which is the egress
         # from earthshadow and the entry into the next earthshadow.
