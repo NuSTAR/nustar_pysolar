@@ -26,6 +26,12 @@ docs/_build
 .pydevproject
 .settings
 
+# Skyfield ephemeris files:
+*bsp
+Leap_Second.dat
+deltat.data
+deltat.preds
+
 # Pycharm editor project files
 .idea
 

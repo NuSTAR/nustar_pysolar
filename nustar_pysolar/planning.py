@@ -56,7 +56,7 @@ def get_sky_position(time, offset):
     # epoch for the RA and dec. We need them in J2000 RA and dec.
     
     astro_sun_pos = get_sun(astro_time)
-
+        
     # Get the solar north pole angle. cgs --> radians
     sun_np=sun.solar_north(t=time).cgs
 
