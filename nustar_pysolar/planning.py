@@ -196,7 +196,30 @@ def _parse_timestamp(tstamp):
     dt = timedelta(int(day)-1, int(sec), 0, 0, int(min), int(hr))
 
     return year+dt;
+    
+def _parse_SOC_timestamp(tstamp):
+    """
+    Convenience function for turning the timestamp into a datetime object.
+    """
+    
+    date1 = tstamp.split(':')
 
+
+#     year=date1[0].strip()
+    year = date1[0]
+    day = date1[1]
+    hr = date1[2]
+    min = date1[3]
+    sec = date1[4]
+    
+    
+    
+    stub = (year.strip()+'-01-01T00:00:00')
+    
+    year = parse_time(stub)
+#    hr, min, sec = date1[2:4]
+    dt = timedelta(int(day)-1, int(sec), 0, 0, int(min), int(hr))
+    return year+dt;
 
 def parse_occultations(infile):
     """
@@ -266,7 +289,76 @@ def parse_occultations(infile):
 
     f.close()
     return all_pairs;
+
+
+def parse_occ_file(infile):
+    """
     
+    Parse the Occultation file from the SOC to determine the unocculted times. 
+    
+    Parameters
+    ----------
+    
+    infile: Input file to be parsed.
+    
+    
+    Returns
+    ----------
+    
+    Returns a list of [ [start, stop], [start stop] ] times where start means
+    you egress from Earth shadow into the sunlight, while stop means you
+    re-enter Earth shadow.
+    
+    Notes
+    ---------
+
+    
+    """
+
+    f = open(infile)
+    all_pairs = []
+    start = 0
+    last = None
+    for ind,line in enumerate(f):
+    
+        
+        # Little parser here to find the right place to start reading in...
+        if (start == 0):
+            if ('Types' not in line) and (start == 0): 
+                continue
+            else:
+                start = 1
+                continue
+        
+        # Get the first date string:
+        
+        
+        fields = line.split()
+        
+        first = fields[0]
+        dtfirst = _parse_SOC_timestamp(first)
+    
+    
+        second = fields[2]
+        dtsecond=_parse_SOC_timestamp(second)
+        
+
+        # Since the file actually gives the start/stop times of going into
+        # earthshadow, we actually want the unocculted times, which is the egress
+        # from earthshadow and the entry into the next earthshadow.
+
+        # Note that this skips the first row.
+        
+        if last is not None:
+            all_pairs.append([last, dtfirst])
+
+        # Store the last entry to add in the next time around...
+        last=dtsecond
+
+    f.close()
+    return all_pairs;
+    
+
 def sunlight_periods(infile, tstart, tend):
     """
     
@@ -307,6 +399,64 @@ def sunlight_periods(infile, tstart, tend):
 
     
     all_pairs = parse_occultations(infile)
+    checkstart = parse_time(tstart)
+    checkend = parse_time(tend)
+    in_range = []
+    set=0
+    for pair in all_pairs:
+        dtmin = (pair[0] - checkstart)
+        dtmax = (pair[1] - checkstart)
+        if ( (pair[1] > checkstart) ):
+            set=1
+        if (set == 0):
+            continue
+        if ( pair[1] > checkend ):
+            break
+        in_range.append(pair)
+        
+    return in_range;
+    
+    
+def unocculted_periods(infile, tstart, tend):
+    """
+    
+    Return the periods when NuSTAR is unocculted in the given timerange.
+    
+    Parameters
+    ----------
+    
+    tstart, tend: ISO formatted times or something else that
+    sunpy.time.parse_time() can read.
+    
+    i.e.
+    
+    tstart='2017-03-11T23:09:10'
+        
+    infile: Input file to be parsed. This should the value returned by
+    nustar_pysolar.download_occultation_times()
+        
+    Returns
+    ----------
+    
+    Returns a list of [ [start, stop], [start stop] ] times where start means
+    you egress from Earth shadow into the sunlight, while stop means you
+    re-enter Earth shadow.
+    
+    The list has been filtered to only include those epochs that span the given
+    time range.
+    
+    Notes
+    ---------
+
+    """
+    import os.path
+    if not(os.path.isfile(infile)):
+        print('Error in nustar_pysolar.sunlight_periods.')
+        print('Input file: '+infile+' does not exist.')
+        return -1;
+
+    
+    all_pairs = parse_occ_file(infile)
     checkstart = parse_time(tstart)
     checkend = parse_time(tend)
     in_range = []
