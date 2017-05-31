@@ -11,25 +11,25 @@ def get_sky_position(time, offset):
     Parameters
     ----------
     time: Date that is parsable by sunpy.time.parse_time()
-    
-    i.e., 
-    
+
+    i.e.,
+
     time='2016-07-26T19:53:15.00'
-    
+
     offset: Offset from the center of the Sun. Must have units from astropy:
-    
+
     i.e.: offset = np.array([1000, 150]) * u.arcsec
-    
-    
+
+
     Returns
     ----------
-    sky_position: Two-element array giving the [RA, Dec] coordinates of the 
-    
+    sky_position: Two-element array giving the [RA, Dec] coordinates of the
 
-    Notes 
+
+    Notes
     ----------
     Syntax:
-    
+
     sky_position = get_sky_position(time, offset)
 
 
@@ -38,19 +38,20 @@ def get_sky_position(time, offset):
 
     from astropy.coordinates import get_sun
     from astropy.time import Time
+    from sunpy import sun
 
     # Convert the date into something that's usable by astropy.
 
 
     start_date = parse_time(time)
     astro_time = Time(start_date)
-    
+
     # Use astropy get_sun for Sun sky position.
     # sunpy has a similar function, but it may be giving a different
     # epoch for the RA and dec. We need them in J2000 RA and dec.
-    
+
     astro_sun_pos = get_sun(astro_time)
-        
+
     # Get the solar north pole angle. cgs --> radians
     sun_np=sun.solar_north(t=time).cgs
 
@@ -60,9 +61,9 @@ def get_sky_position(time, offset):
 
     # Rotation matrix for a counter-clockwise rotation since we're going
     # back to celestial north from solar north
-    rotMatrix = np.array([[np.cos(sun_np), np.sin(sun_np)], 
+    rotMatrix = np.array([[np.cos(sun_np), np.sin(sun_np)],
                          [-np.sin(sun_np),  np.cos(sun_np)]])
-    
+
     # Project the offset onto the Sun
     delta_offset = np.dot(offset, rotMatrix)
 
@@ -76,6 +77,100 @@ def get_sky_position(time, offset):
     sky_position = sun_pos + delta_offset
 
     return sky_position
+
+
+def get_skyfield_position(time, offset, load_path=None):
+    """Code for converting solar offsets to pointing position.
+
+    Parameters
+    ----------
+    time: Date that is parsable by sunpy.time.parse_time()
+
+    i.e.,
+
+    time='2016-07-26T19:53:15.00'
+
+    offset: Offset from the center of the Sun. Must have units from astropy:
+
+    i.e.: offset = np.array([1000, 150]) * u.arcsec
+
+
+    Returns
+    ----------
+    sky_position: Two-element array giving the [RA, Dec] coordinates of the
+
+
+    Notes
+    ----------
+    Syntax:
+
+    sky_position = get_sky_position(time, offset)
+
+    """
+
+    from skyfield.api import EarthSatellite, Loader
+    from astropy.time import Time
+    import sunpy.sun
+
+    if load_path is None:
+        load=Loader('./')
+    else:
+        load=Loader(load_path)
+
+
+    ts = load.timescale()
+    planets = load('de436.bsp')
+    earth = planets['Earth']
+    sun = planets['Sun']
+
+    start_date = parse_time(time)
+    utc = Time(start_date)
+    tcheck = ts.from_astropy(utc)
+
+    # Uncomment this to add in orbital parallax corrections.
+    #    tlefile = '../data/NuSTAR.tle'
+    #    mindt, line1, line2 = get_epoch_tle(checktime, tlefile)
+    #    print('Days between TLE entry and when you want to observe: ', mindt)
+    #    nustar = EarthSatellite(line1, line2)
+    #    geometry = nustar + earth
+
+
+    #    nustar_bary = geometry.at(tcheck)
+#    astrometric = nustar_bary.observe(sun)
+#    this_ra_sky, this_dec_sky, dist = astrometric.radec()
+
+
+    geocentric = earth.at(tcheck).observe(sun)
+    this_ra_geo, this_dec_geo, dist = geocentric.radec()
+
+
+    # Get the solar north pole angle. cgs --> radians
+    sun_np = sunpy.sun.solar_north(t=time).cgs
+
+    # Get the center of the Sun, and assign it degrees.
+    # Doing it this was is necessary to do the vector math below.
+    sun_pos = np.array([this_ra_geo.to(u.deg).value, this_dec_geo.to(u.deg).value])*u.deg
+
+
+    # Rotation matrix for a counter-clockwise rotation since we're going
+    # back to celestial north from solar north
+    rotMatrix = np.array([[np.cos(sun_np), np.sin(sun_np)],
+                          [-np.sin(sun_np), np.cos(sun_np)]])
+
+    # Project the offset onto the Sun
+    delta_offset = np.dot(offset, rotMatrix)
+
+    # Scale to RA based on the declination.
+    delta_offset = delta_offset * np.array([1. / np.cos(sun_pos[1]), 1.])
+
+    # Account for the fact that +Ra == East and we have defined +X = West
+    delta_offset = delta_offset * [-1.0, 1.0]
+
+    # Apply the offset and return the sky position.
+    sky_position = sun_pos + delta_offset
+
+    return sky_position
+
 
 def get_nustar_roll(time, angle):
     """Code to determine the NuSTAR roll angle for a given field-of-view on the
