@@ -2,8 +2,6 @@ from datetime import datetime
 from astropy.time import Time
 
 
-
-
 def get_nustar_location(checktime, line1, line2):
     ''' 
     
@@ -53,8 +51,6 @@ def eci2el(x,y,z,dt):
 
     return el
 
-
-    
 def get_moon_j2000(epoch, line1, line2, position = None):
     '''
     

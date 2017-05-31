@@ -1,21 +1,12 @@
-from sunpy.time import parse_time
 from datetime import timedelta
-from datetime import date
 
-from astropy.time import Time
-from astropy.coordinates import get_sun
-from astropy.coordinates import SkyCoord
-
-from sunpy import sun
-import numpy as np
 from astropy import units as u
-
+import numpy as np
+from sunpy.time import parse_time
 
 
 def get_sky_position(time, offset):
-    """
-    
-    Code for converting solar offsets to pointing position.
+    """Code for converting solar offsets to pointing position.
 
     Parameters
     ----------
@@ -44,7 +35,10 @@ def get_sky_position(time, offset):
 
 
     """
-    
+
+    from astropy.coordinates import get_sun
+    from astropy.time import Time
+
     # Convert the date into something that's usable by astropy.
 
 
@@ -81,11 +75,10 @@ def get_sky_position(time, offset):
     # Apply the offset and return the sky position.
     sky_position = sun_pos + delta_offset
 
-    return sky_position;
-    
+    return sky_position
+
 def get_nustar_roll(time, angle):
-    """
-    Code to determine the NuSTAR roll angle for a given field-of-view on the
+    """Code to determine the NuSTAR roll angle for a given field-of-view on the
     Sun for a given time.
     
     Parameters
@@ -109,80 +102,18 @@ def get_nustar_roll(time, angle):
     nustar_roll: NuSTAR PA angle with respect to celestial north.
     
     """
-        
-    start_date = parse_time(time)
-    astro_time = Time(start_date)
+
+    from sunpy import sun
+
     # Get the solar north pole angle. cgs --> radians
     sun_np=sun.solar_north(t=time).deg * u.deg
-        
-    nustar_roll = np.mod( sun_np + angle, 360*u.deg)
+
+    nustar_roll = np.mod(sun_np + angle, 360*u.deg)
 
     return nustar_roll;
 
-def download_occultation_times(outdir='./'):
-    """
-    
-    Pull the orbital information from the Berkeley website
-    and then returns the location of the file.
-     
-    Parameters
-    ----------
-    
-    outdir: Optional desired output location. Defaults to the working directory.
-    
-    Returns
-    ----------
-    
-    Returns the filename that you've downloaded.
-    
-    Notes
-    ---------
-    
-    Will not work if year_day is in the future. This is the time the file was
-    generated, not the date you want to observe. The occultation windows should
-    extend roughly a month into the future, though they may be more uncertain
-    the further ahead you go.
-    
-    """
-    import os
-
-    # Make sure you've got a trailing slash...
-    if not(outdir.endswith('/')):
-        outdir+'/'
-    
-    # Make sure the directory exists and create one if not.
-    directory = os.path.dirname(outdir)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-        
-    # Get yesterday's file...
-    today = date.today() - timedelta(1) 
-    year = str(today.timetuple().tm_year)
-    day='{0:03d}'.format(today.timetuple().tm_yday)
-    year_doy=year+'_'+day
-
-    
-    myname='nustar_pysolar.planning'
-    import wget
-    
-    url='http://hessi.ssl.berkeley.edu/ground_systems/products/NUSTAR/'
-    url+=year_doy+'/'
-    fname='NUSTAR.'+year_doy+'.SHADOW_ANALYSIS.txt' 
-    url+=fname
-
-    # Check to see if the file exists:
-    import os.path
-    if not(os.path.isfile(outdir+fname)):
-        wget.download(url, out=outdir+fname)
-    
-    return outdir+fname;
-    
-    
-    
-    
 def _parse_timestamp(tstamp):
-    """
-    Convenience function for turning the timestamp into a datetime object.
+    """Convenience function for turning the SOC timestamp into a datetime object.
     """
     
     date1 = tstamp.split('/')
@@ -198,14 +129,11 @@ def _parse_timestamp(tstamp):
     return year+dt;
     
 def _parse_SOC_timestamp(tstamp):
-    """
-    Convenience function for turning the timestamp into a datetime object.
+    """Convenience function for turning the timestamp into a datetime object.
     """
     
     date1 = tstamp.split(':')
 
-
-#     year=date1[0].strip()
     year = date1[0]
     day = date1[1]
     hr = date1[2]
@@ -269,9 +197,6 @@ def parse_occultations(infile):
         second = (fields[1].split('UTC'))[0].strip()
         dtsecond=_parse_timestamp(second)
 
-#        print(first, dtfirst)
-#        print(second, dtsecond)
-#        break
         # Since the file actually gives the start/stop times of going into
         # earthshadow, we actually want the "In Sun" times, which is the egress
         # from earthshadow and the entry into the next earthshadow.
@@ -287,75 +212,6 @@ def parse_occultations(infile):
 
     f.close()
     return all_pairs
-
-
-def parse_occ_file(infile):
-    """
-    
-    Parse the Occultation file from the SOC to determine the unocculted times. 
-    
-    Parameters
-    ----------
-    
-    infile: Input file to be parsed.
-    
-    
-    Returns
-    ----------
-    
-    Returns a list of [ [start, stop], [start stop] ] times where start means
-    you egress from Earth shadow into the sunlight, while stop means you
-    re-enter Earth shadow.
-    
-    Notes
-    ---------
-
-    
-    """
-
-    f = open(infile)
-    all_pairs = []
-    start = 0
-    last = None
-    for ind,line in enumerate(f):
-    
-        
-        # Little parser here to find the right place to start reading in...
-        if (start == 0):
-            if ('Types' not in line) and (start == 0): 
-                continue
-            else:
-                start = 1
-                continue
-        
-        # Get the first date string:
-        
-        
-        fields = line.split()
-        
-        first = fields[0]
-        dtfirst = _parse_SOC_timestamp(first)
-    
-    
-        second = fields[2]
-        dtsecond=_parse_SOC_timestamp(second)
-        
-
-        # Since the file actually gives the start/stop times of going into
-        # earthshadow, we actually want the unocculted times, which is the egress
-        # from earthshadow and the entry into the next earthshadow.
-
-        # Note that this skips the first row.
-        
-        if last is not None:
-            all_pairs.append([last, dtfirst])
-
-        # Store the last entry to add in the next time around...
-        last=dtsecond
-
-    f.close()
-    return all_pairs;
-    
 
 def sunlight_periods(infile, tstart, tend):
     """Return the periods when NuSTAR is in Sunlight in the given timerange.
@@ -418,61 +274,3 @@ def sunlight_periods(infile, tstart, tend):
         return -1
     else:
         return in_range
-    
-    
-def unocculted_periods(infile, tstart, tend):
-    """
-    
-    Return the periods when NuSTAR is unocculted in the given timerange.
-    
-    Parameters
-    ----------
-    
-    tstart, tend: ISO formatted times or something else that
-    sunpy.time.parse_time() can read.
-    
-    i.e.
-    
-    tstart='2017-03-11T23:09:10'
-        
-    infile: Input file to be parsed. This should the value returned by
-    nustar_pysolar.download_occultation_times()
-        
-    Returns
-    ----------
-    
-    Returns a list of [ [start, stop], [start stop] ] times where start means
-    you egress from Earth shadow into the sunlight, while stop means you
-    re-enter Earth shadow.
-    
-    The list has been filtered to only include those epochs that span the given
-    time range.
-    
-    Notes
-    ---------
-
-    """
-    import os.path
-    if not(os.path.isfile(infile)):
-        print('Error in nustar_pysolar.sunlight_periods.')
-        print('Input file: '+infile+' does not exist.')
-        return -1;
-
-    
-    all_pairs = parse_occ_file(infile)
-    checkstart = parse_time(tstart)
-    checkend = parse_time(tend)
-    in_range = []
-    set=0
-    for pair in all_pairs:
-        dtmin = (pair[0] - checkstart)
-        dtmax = (pair[1] - checkstart)
-        if ( (pair[1] > checkstart) ):
-            set=1
-        if (set == 0):
-            continue
-        if ( pair[1] > checkend ):
-            break
-        in_range.append(pair)
-        
-    return in_range;

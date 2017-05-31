@@ -57,8 +57,7 @@ def download_occultation_times(outdir='./'):
         wget.download(url, out=outdir+fname)
     
     return outdir+fname
-    
-    
+
 def download_tle(outdir='./'):
     """Download the NuSTAR TLE archive.
     
@@ -104,8 +103,7 @@ def download_tle(outdir='./'):
     
     
     return outfile
-    
-    
+
 def read_tle_file(tlefile, **kwargs):
     """Read in the TLE file. 
     
@@ -116,7 +114,6 @@ def read_tle_file(tlefile, **kwargs):
     line1 = []
     line2 = []
     
-    from os import path
     from datetime import datetime
     # Catch if the file can't be opened:
     try:
@@ -139,7 +136,6 @@ def read_tle_file(tlefile, **kwargs):
             line2.extend([line.strip()])
     f.close()
     return times, line1, line2
-    
 
 def get_epoch_tle(epoch, tlefile):
     """Find the TLE that is closest to the epoch you want to search.
@@ -149,7 +145,6 @@ def get_epoch_tle(epoch, tlefile):
     """
 
     times, line1, line2 = read_tle_file(tlefile)
-    from datetime import datetime
     from astropy.time import Time
     
     # Allow astropy Time objects
@@ -168,10 +163,3 @@ def get_epoch_tle(epoch, tlefile):
     good_line2 = line2[min_ind]
 
     return mindt, good_line1, good_line2
-    
-    
-    
-    
-    
-    
-    
