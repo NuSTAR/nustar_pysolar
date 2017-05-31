@@ -27,7 +27,7 @@ docs/_build
 .settings
 
 # Skyfield ephemeris files:
-*bsp
+*bsp*
 Leap_Second.dat
 deltat.data
 deltat.preds
