@@ -222,9 +222,7 @@ def _parse_SOC_timestamp(tstamp):
     return year+dt;
 
 def parse_occultations(infile):
-    """
-    
-    Parse the shadow analysis file to determine the 'in Sun' times. 
+    """Parse the shadow analysis file to determine the 'in Sun' times. 
     
     Parameters
     ----------
@@ -288,7 +286,7 @@ def parse_occultations(infile):
         last=dtsecond
 
     f.close()
-    return all_pairs;
+    return all_pairs
 
 
 def parse_occ_file(infile):
@@ -360,9 +358,7 @@ def parse_occ_file(infile):
     
 
 def sunlight_periods(infile, tstart, tend):
-    """
-    
-    Return the periods when NuSTAR is in Sunlight in the given timerange.
+    """Return the periods when NuSTAR is in Sunlight in the given timerange.
     
     Parameters
     ----------
@@ -402,6 +398,8 @@ def sunlight_periods(infile, tstart, tend):
     checkstart = parse_time(tstart)
     checkend = parse_time(tend)
     in_range = []
+
+    
     set=0
     for pair in all_pairs:
         dtmin = (pair[0] - checkstart)
@@ -414,7 +412,12 @@ def sunlight_periods(infile, tstart, tend):
             break
         in_range.append(pair)
         
-    return in_range;
+    if len(in_range) == 0:
+        print('Error in function: '+sunlight_periods.__name__)
+        print('No dates found in range. Pick a different occultation file.')
+        return -1
+    else:
+        return in_range
     
     
 def unocculted_periods(infile, tstart, tend):
