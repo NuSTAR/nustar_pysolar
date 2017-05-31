@@ -16,3 +16,4 @@ if not _ASTROPY_SETUP_:
 	from . import map
 	from . import convert
 	from . import tracking
+	from . import utils

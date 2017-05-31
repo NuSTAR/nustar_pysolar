@@ -66,22 +66,6 @@ def get_epoch_tle(epoch, tlefile):
     return mindt, good_line1, good_line2
 
 
-   
-def convert_nustar_time(t, leap=5):
-    ''' 
-    
-    Converts MET seconds to a datetime object.
-    
-    Default is to subtract off 5 leap seconds.
-
-    '''
-    import astropy.units as u
-    mjdref = 55197*u.d
-    met = (t - leap)* u.s + mjdref
-    met_datetime = Time(met.to(u.d), format = 'mjd').datetime
-    return met_datetime
-
-
 def get_nustar_location(checktime, line1, line2):
     ''' 
     
