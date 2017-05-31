@@ -4,3 +4,4 @@ matplotlib
 sunpy
 wget=2.2
 sphinx
+skyfield
