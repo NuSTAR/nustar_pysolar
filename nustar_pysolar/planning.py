@@ -79,7 +79,7 @@ def get_sky_position(time, offset):
     return sky_position
 
 
-def get_skyfield_position(time, offset, load_path=None):
+def get_skyfield_position(time, offset, load_path=None, parallax_corection=False):
     """Code for converting solar offsets to pointing position.
 
     Parameters
@@ -95,10 +95,14 @@ def get_skyfield_position(time, offset, load_path=None):
     i.e.: offset = np.array([1000, 150]) * u.arcsec
 
 
+    load_path (optional): Relative path from currently location to store bsp files
+
+    parallax_correction: Use the NuSTAR TLE to correct for orbital parallax
+
+
     Returns
     ----------
     sky_position: Two-element array giving the [RA, Dec] coordinates of the
-
 
     Notes
     ----------
@@ -112,10 +116,12 @@ def get_skyfield_position(time, offset, load_path=None):
     from astropy.time import Time
     import sunpy.sun
 
-    if load_path is None:
-        load=Loader('./')
+    if load_path is False:
+        load_path = './'
+        load=Loader(load_path)
     else:
         load=Loader(load_path)
+
 
 
     ts = load.timescale()
@@ -127,20 +133,19 @@ def get_skyfield_position(time, offset, load_path=None):
     utc = Time(start_date)
     tcheck = ts.from_astropy(utc)
 
-    # Uncomment this to add in orbital parallax corrections.
-    #    tlefile = '../data/NuSTAR.tle'
-    #    mindt, line1, line2 = get_epoch_tle(checktime, tlefile)
-    #    print('Days between TLE entry and when you want to observe: ', mindt)
-    #    nustar = EarthSatellite(line1, line2)
-    #    geometry = nustar + earth
+    if parallax_corection is False:
+        observer = earth
+    else:
+        import nustar_pysolar.io as io
+        tlefile = io.download_tle(outdir=load_path)
+        mindt, line1, line2 = io.get_epoch_tle(utc, tlefile)
+#        print(get_skyfield_position.__name__+': Days between TLE entry and when you want to observe: ', mindt)
+        nustar = EarthSatellite(line1, line2)
+        observer = earth + nustar
 
 
-    #    nustar_bary = geometry.at(tcheck)
-#    astrometric = nustar_bary.observe(sun)
-#    this_ra_sky, this_dec_sky, dist = astrometric.radec()
 
-
-    geocentric = earth.at(tcheck).observe(sun)
+    geocentric = observer.at(tcheck).observe(sun)
     this_ra_geo, this_dec_geo, dist = geocentric.radec()
 
 
