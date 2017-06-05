@@ -1,0 +1,26 @@
+EXTNAME   'BADPIX'             / Name of the binary table extension
+EXTVER    2                    / There shall be one instance of this extension for each detector
+DETNAM    'DET1'               / CZT Detector ID (0,1,2 or 3)
+TELESCOP  'NuSTAR  '           / Telescope (mission) name
+INSTRUME  'FPMB    '           / Instrument name (FPMA or FPMB)
+ORIGIN    'Caltech   '         / Source of FITS file
+CREATOR   'FTOOLS 6.10 '       / Creator
+VERSION                      1 / Extension version number
+FILENAME  'nuBuserbadpix_solar.fits' / File name
+CONTENT   'NuSTAR User Bad Pixel Table'      / File content
+CCLS0001  'BCF     '           / Daset is a Basic Calibration File
+CDTP0001  'DATA    '           / Calibration file contains data
+CCNM0001  'BADPIX'         / Type of calibration data 
+CVSD0001  '2010-01-01'         / Date when this file should first be used
+CVST0001  '00:00:00'           / Time of day when this file should first be used
+CDES0001  'NuSTAR User Bad Pixel Table' /Description
+COMMENT   
+COMMENT   This extension provides, for Detector #1 of the FPMA, the list of 
+COMMENT   user-defined bad pixels. 
+COMMENT   The BADFLAG column contains the bad pixel flags. These are a 
+COMMENT   combination of the following bit settings:
+COMMENT   
+COMMENT   b0000000000000001 Bad pixel from on-ground CALDB Bad Pixel File
+COMMENT   b0000000000000010 Disabled pixel from on-board software
+COMMENT   b0000000000000100 Bad pixels in the file provided by the user
+COMMENT   

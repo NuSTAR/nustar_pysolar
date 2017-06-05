@@ -1,0 +1,4 @@
+TELESCOP  'NuSTAR   '           / Telescope (mission) name
+INSTRUME  'FPMB     '           / Instrument name (FPMA or FPMB)
+ORIGIN    'Caltech   '         / Source of FITS file
+CREATOR   'FTOOLS 6.10 '       / Creator
