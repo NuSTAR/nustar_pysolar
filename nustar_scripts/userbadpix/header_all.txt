@@ -1,0 +1,4 @@
+TTYPE1  = 'TIME    '           / Start Time of Bad Pixel Interval
+TTYPE2  = 'RAWX    '           / X-position in Raw Detector Coordinates
+TTYPE3  = 'RAWY    '           / Y-position in Raw Detector Coordinates
+TTYPE4  = 'BADFLAG '           / Bad pixel flag

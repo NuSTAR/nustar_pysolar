@@ -1,0 +1,4 @@
+TIME          1D    s
+RAWX          1B    pixel
+RAWY          1B    pixel
+BADFLAG       16X
