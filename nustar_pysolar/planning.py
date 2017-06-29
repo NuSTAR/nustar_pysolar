@@ -116,7 +116,7 @@ def get_skyfield_position(time, offset, load_path=None, parallax_corection=False
     from astropy.time import Time
     import sunpy.sun
 
-    if load_path is False:
+    if load_path is None:
         load_path = './'
         load=Loader(load_path)
     else:
@@ -145,7 +145,7 @@ def get_skyfield_position(time, offset, load_path=None, parallax_corection=False
 
 
 
-    geocentric = observer.at(tcheck).observe(sun)
+    geocentric = observer.at(tcheck).observe(sun).apparent()
     this_ra_geo, this_dec_geo, dist = geocentric.radec()
 
 
