@@ -1,5 +1,5 @@
 
-def convert_nustar_time(t, leap=5):
+def convert_nustar_time(t, leap=5, astropy_time=False):
     '''Converts MET seconds to a datetime object.
     
     Uses the astropy.time.Time method to do the conversion since you have
@@ -14,7 +14,13 @@ def convert_nustar_time(t, leap=5):
     mjdref = 55197*u.d
     met = (t - leap)* u.s + mjdref
     met_datetime = Time(met.to(u.d), format = 'mjd').datetime
-    return met_datetime
+    
+    if astropy_time is True:
+        from astropy.time import Time
+        met_astro = Time(met_datetime)
+        return met_astro
+    else:
+        return met_datetime
 
 def channel_to_keV(pi):
     '''Converts MET seconds to a datetime object.
