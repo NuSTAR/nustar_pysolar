@@ -50,10 +50,10 @@ def _xy_to_radec(evtdata, hdr):
     for field in hdr.keys():
         if field.find('TYPE') != -1:
             if hdr[field] == 'X':
-                print(hdr[field][5:8])
+#                print(hdr[field][5:8])
                 xval = field[5:8]
             if hdr[field] == 'Y':
-                print(hdr[field][5:8])
+#                print(hdr[field][5:8])
                 yval = field[5:8]
 
     ra_ref = hdr['TCRVL'+xval]*u.deg
@@ -276,10 +276,10 @@ def to_solar(evtdata, hdr, **kwargs):
     for field in hdr.keys():
         if field.find('TYPE') != -1:
             if hdr[field] == 'X':
-                print(hdr[field][5:8])
+#                print(hdr[field][5:8])
                 xval = field[5:8]
             if hdr[field] == 'Y':
-                print(hdr[field][5:8])
+#                print(hdr[field][5:8])
                 yval = field[5:8]
     delx = -1.0 * hdr['TCDLT'+xval] * u.deg
     dely = hdr['TCDLT'+yval]*u.deg
