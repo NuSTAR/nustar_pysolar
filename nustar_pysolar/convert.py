@@ -36,10 +36,16 @@ def _get_sun_pos(met):
     sun_np=sun.solar_north(t=sun_time).cgs
     return sun_pos, sun_np;
 
+
+
 def _xy_to_radec(evtdata, hdr):
     """ Conversion function to go from X/Y coordinates
         in the FITS file to RA/Dec coordinates.
     """
+    
+    from nustar_pysolar.utils import convert_nustar_time
+
+
 # Parse the header information
     for field in hdr.keys():
         if field.find('TYPE') != -1:
@@ -64,8 +70,10 @@ def _xy_to_radec(evtdata, hdr):
     y = evtdata['Y']
 
     # Convert the NuSTAR epoch times to MJD
-    mjdref=hdr['MJDREFI']
-    met = evtdata['TIME']*u.s + mjdref*u.d
+    met = convert_nustar_time(evtdata['Time'], astropy_time=True)
+    
+#     mjdref=hdr['MJDREFI']
+#     met = evtdata['TIME']*u.s + mjdref*u.d
 
 #   time = astropy.time.Time(mjdref*u.d+met, format = 'mjd')
 
@@ -140,6 +148,98 @@ def _delta_solar(ra_x, dec_y, met, **kwargs):
     return sun_x, sun_y
 
 
+def _delta_solar_skyfield(ra_x, dec_y, met, **kwargs):
+    """ Function to compute the offsets from the center of
+        the Sun as a function of time.
+
+        Use the tStep argument to define how often you want
+        to update the solar ephemeris. Default is every 5 seconds.
+
+        Inputs: ra_x, dec_y, and met are all arrays that contain the
+        RA, Dec, and time of arrival of each count, respectively. The arrival time
+        must have astropy units attached to it.
+
+        Outputs: sun_x, sun_y are the x and y values (in arcseconds)
+        from the center of the Sun in the +North and +West directions.
+
+    """
+    import astropy.units as u
+    from nustar_pysolar.utils import skyfield_ephem
+    from sunpy import sun
+    
+    # How often you want to update the solar ephemeris:
+    tStep=kwargs.get('tStep', 5.0)
+    tStep = tStep * u.s
+
+    load_path=kwargs.get('load_path', None)
+    observer, TheSun, ts = skyfield_ephem(load_path = load_path, 
+                                        parallax_correction=True,
+                                        utc=met[0])
+    
+        
+
+    # How many events do you want to do?
+    maxEvt=kwargs.get('maxEvt', len(ra_x))
+
+    # Keep last time we updated things
+    last_met = met[0] - tStep * 2.
+    last_i = 0
+    
+    sun_x = np.zeros_like(ra_x)
+    sun_y = np.zeros_like(dec_y)
+    for i in np.arange(len(ra_x)):
+        if( (met[i] - last_met) > tStep ):
+            last_met = met[i]
+            
+
+            tcheck = ts.from_astropy(last_met)
+            astrometric = observer.at(tcheck).observe(TheSun)
+            this_ra, this_dec, dist = astrometric.radec()
+            
+            
+
+            # Get the center of the Sun, and assign it degrees.
+            # Doing it this was is necessary to do the vector math below.
+            sun_pos = np.array([this_ra.to(u.deg).value,
+                this_dec.to(u.deg).value])*u.deg
+
+            
+            sun_np = sun.solar_north(t=last_met).cgs
+
+            # Rotation matrix for a counter-clockwise rotation since we're going
+            # back to celestial north from solar north
+            rotMatrix = np.array([[np.cos(sun_np), np.sin(sun_np)],
+                                  [-np.sin(sun_np),  np.cos(sun_np)]])
+
+        # Diagnostics
+        #         di = (i -last_i)
+        #        print("Updating Sun position...")
+        #         if di > 0:
+        #             print(i, di)
+        #             dt = toc()
+        #             tic()
+        #             last_i = i
+        #             print("Time per event: ",dt / float(di) )
+        # From here on we do things for every photon:
+
+        ph_pos = np.array([ra_x[i].value, dec_y[i].value]) * u.deg
+        offset = ph_pos - sun_pos
+       
+        # Project the offset onto the Sun
+        delta_offset = ((np.dot(offset, rotMatrix)).to(u.arcsec))
+
+        # Account for East->West conversion for +X direction in heliophysics coords
+        delta_offset = delta_offset*[-1., 1.]
+
+        sun_x[i] = delta_offset[0]
+        sun_y[i] = delta_offset[1]
+        if (i>maxEvt):
+            break
+        
+    return sun_x, sun_y
+
+
+
 def to_solar(evtdata, hdr, **kwargs):
     """ Main script to convert the events to solar coordinates.
 
@@ -169,7 +269,7 @@ def to_solar(evtdata, hdr, **kwargs):
     (ra_x, dec_y, met) = _xy_to_radec(evtdata, hdr)
     
     # Conver to solar coordinates
-    (sun_x, sun_y) = _delta_solar(ra_x, dec_y, met, **kwargs)
+    (sun_x, sun_y) = _delta_solar_skyfield(ra_x, dec_y, met, **kwargs)
 
 
     # Parse the header information to get the native bin size
