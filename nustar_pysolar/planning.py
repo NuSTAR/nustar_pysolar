@@ -79,8 +79,8 @@ def get_sky_position(time, offset):
     return sky_position
 
 
-def get_skyfield_position(time, offset, load_path=None, parallax_corection=False):
-    """Code for converting solar offsets to pointing position.
+def get_skyfield_position(time, offset, load_path=None, parallax_correction=False):
+    """Code for converting solar coordinates to astrometric (J200) RA/Dec coordinates.
 
     Parameters
     ----------
@@ -103,48 +103,28 @@ def get_skyfield_position(time, offset, load_path=None, parallax_corection=False
     Returns
     ----------
     sky_position: Two-element array giving the [RA, Dec] coordinates of the
+    target location. Note this is given in astrometric (J2000) RA/Dec, which is what
+    we need for the NuSTAR planning system.
 
     Notes
     ----------
     Syntax:
 
-    sky_position = get_sky_position(time, offset)
+    skyfield_position = get_skyfield_position(time, offset)
 
     """
 
-    from skyfield.api import EarthSatellite, Loader
     from astropy.time import Time
     import sunpy.sun
-
-    if load_path is None:
-        load_path = './'
-        load=Loader(load_path)
-    else:
-        load=Loader(load_path)
-
-
-
-    ts = load.timescale()
-    planets = load('de436.bsp')
-    earth = planets['Earth']
-    sun = planets['Sun']
-
+    from nustar_pysolar.utils import skyfield_ephem
     start_date = parse_time(time)
     utc = Time(start_date)
+
+    observer, sun, ts = skyfield_ephem(load_path=load_path,
+                                        parallax_correction=parallax_correction,
+                                        utc=utc)
+
     tcheck = ts.from_astropy(utc)
-
-    if parallax_corection is False:
-        observer = earth
-    else:
-        import nustar_pysolar.io as io
-        tlefile = io.download_tle(outdir=load_path)
-        mindt, line1, line2 = io.get_epoch_tle(utc, tlefile)
-#        print(get_skyfield_position.__name__+': Days between TLE entry and when you want to observe: ', mindt)
-        nustar = EarthSatellite(line1, line2)
-        observer = earth + nustar
-
-
-
     geocentric = observer.at(tcheck).observe(sun)
     this_ra_geo, this_dec_geo, dist = geocentric.radec()
 
