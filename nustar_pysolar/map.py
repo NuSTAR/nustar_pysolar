@@ -83,7 +83,8 @@ def make_sunpy(evtdata, hdr):
 	"HGLN_OBS": 0,
 	"RSUN_OBS": sun.solar_semidiameter_angular_size(mid_obs_time).value,
 	"RSUN_REF": sun.constants.radius.value,
-	"DSUN_OBS": sun.sunearth_distance(mid_obs_time).value
+	# Assumes dsun_obs in m if don't specify the units, so give units
+	"DSUN_OBS": sun.sunearth_distance(mid_obs_time).value*u.astrophys.au
 	}
 	# For some reason the DSUN_OBS crashed the save...
 
