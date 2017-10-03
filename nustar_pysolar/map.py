@@ -42,14 +42,17 @@ def make_sunpy(evtdata, hdr):
 	max_x= hdr['TLMAX'+xval]
 	max_y= hdr['TLMAX'+yval]
 
-	delx = hdr['TCDLT'+xval]
-	dely = hdr['TCDLT'+yval]
+	delx = abs(hdr['TCDLT'+xval])
+	dely = abs(hdr['TCDLT'+yval])
 
 	x = evtdata['X'][:]
 	y = evtdata['Y'][:]
 	met = evtdata['TIME'][:]*u.s
 	mjdref=hdr['MJDREFI']
 	mid_obs_time = astropy.time.Time(mjdref*u.d+met.mean(), format = 'mjd')
+
+    # Add in the exposure time (or livetime), just a number not units of seconds 
+	exp_time=hdr['EXPOSURE']
 
 	# Use the native binning for now
 
@@ -63,6 +66,7 @@ def make_sunpy(evtdata, hdr):
 
 	dict_header = {
 	"DATE-OBS": mid_obs_time.iso,
+	"EXPTIME": exp_time,
 	"CDELT1": scale,
 	"NAXIS1": bins,
 	"CRVAL1": 0.,
@@ -79,7 +83,8 @@ def make_sunpy(evtdata, hdr):
 	"HGLN_OBS": 0,
 	"RSUN_OBS": sun.solar_semidiameter_angular_size(mid_obs_time).value,
 	"RSUN_REF": sun.constants.radius.value,
-	"DSUN_OBS": sun.sunearth_distance(mid_obs_time).value
+	# Assumes dsun_obs in m if don't specify the units, so give units
+	"DSUN_OBS": sun.sunearth_distance(mid_obs_time).value*u.astrophys.au
 	}
 	# For some reason the DSUN_OBS crashed the save...
 
