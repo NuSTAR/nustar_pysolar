@@ -10,88 +10,91 @@ import logging
 
 
 def make_sunpy(evtdata, hdr):
-	""" Make a sunpy map based on the NuSTAR data.
-	
-	Parameters
-	----------
+    """ Make a sunpy map based on the NuSTAR data.
+    
+    Parameters
+    ----------
     evtdata: FITS data structure
-		This should be an hdu.data structure from a NuSTAR FITS file.
+        This should be an hdu.data structure from a NuSTAR FITS file.
 
-	hdr: FITS header containing the astrometric information
-	
-	Returns
+    hdr: FITS header containing the astrometric information
+    
+    Returns
     -------
 
-	nustar_map:
-		A sunpy map objecct
-	
-	"""
+    nustar_map:
+        A sunpy map objecct
+    
+    """
 
-	# Parse Header keywords
-	for field in hdr.keys():
-		if field.find('TYPE') != -1:
-			if hdr[field] == 'X':
-				print(hdr[field][5:8])
-				xval = field[5:8]
-			if hdr[field] == 'Y':
-				print(hdr[field][5:8])
-				yval = field[5:8]
-		
-	min_x= hdr['TLMIN'+xval]
-	min_y= hdr['TLMIN'+yval]
-	max_x= hdr['TLMAX'+xval]
-	max_y= hdr['TLMAX'+yval]
+    from sunpy.coordinates import get_sunearth_distance
 
-	delx = abs(hdr['TCDLT'+xval])
-	dely = abs(hdr['TCDLT'+yval])
+    # Parse Header keywords
+    for field in hdr.keys():
+        if field.find('TYPE') != -1:
+            if hdr[field] == 'X':
+                print(hdr[field][5:8])
+                xval = field[5:8]
+            if hdr[field] == 'Y':
+                print(hdr[field][5:8])
+                yval = field[5:8]
+        
+    min_x= hdr['TLMIN'+xval]
+    min_y= hdr['TLMIN'+yval]
+    max_x= hdr['TLMAX'+xval]
+    max_y= hdr['TLMAX'+yval]
 
-	x = evtdata['X'][:]
-	y = evtdata['Y'][:]
-	met = evtdata['TIME'][:]*u.s
-	mjdref=hdr['MJDREFI']
-	mid_obs_time = astropy.time.Time(mjdref*u.d+met.mean(), format = 'mjd')
+    delx = abs(hdr['TCDLT'+xval])
+    dely = abs(hdr['TCDLT'+yval])
+
+    x = evtdata['X'][:]
+    y = evtdata['Y'][:]
+    met = evtdata['TIME'][:]*u.s
+    mjdref=hdr['MJDREFI']
+    mid_obs_time = astropy.time.Time(mjdref*u.d+met.mean(), format = 'mjd')
 
     # Add in the exposure time (or livetime), just a number not units of seconds 
-	exp_time=hdr['EXPOSURE']
+    exp_time=hdr['EXPOSURE']
 
-	# Use the native binning for now
+    # Use the native binning for now
 
-	# Assume X and Y are the same size
-	resample = 1.0
-	scale = delx * resample
-	bins = (max_x - min_x) / (resample)
+    # Assume X and Y are the same size
+    resample = 1.0
+    scale = delx * resample
+    bins = (max_x - min_x) / (resample)
 
-	H, yedges, xedges = np.histogram2d(y, x, bins=bins, range = [[min_y,max_y], [min_x, max_x]])
+    H, yedges, xedges = np.histogram2d(y, x, bins=bins, range = [[min_y,max_y], [min_x, max_x]])
 
 
-	dict_header = {
-	"DATE-OBS": mid_obs_time.iso,
-	"EXPTIME": exp_time,
-	"CDELT1": scale,
-	"NAXIS1": bins,
-	"CRVAL1": 0.,
-	"CRPIX1": bins*0.5,
-	"CUNIT1": "arcsec",
-	"CTYPE1": "HPLN-TAN",
-	"CDELT2": scale,
-	"NAXIS2": bins,
-	"CRVAL2": 0.,
-	"CRPIX2": bins*0.5 + 0.5,
-	"CUNIT2": "arcsec",
-	"CTYPE2": "HPLT-TAN",
-	"HGLT_OBS": 0,
-	"HGLN_OBS": 0,
-	"RSUN_OBS": sun.solar_semidiameter_angular_size(mid_obs_time).value,
-	"RSUN_REF": sun.constants.radius.value,
-	# Assumes dsun_obs in m if don't specify the units, so give units
-	"DSUN_OBS": sun.sunearth_distance(mid_obs_time).value*u.astrophys.au
-	}
-	# For some reason the DSUN_OBS crashed the save...
+    dict_header = {
+    "DATE-OBS": mid_obs_time.iso,
+    "EXPTIME": exp_time,
+    "CDELT1": scale,
+    "NAXIS1": bins,
+    "CRVAL1": 0.,
+    "CRPIX1": bins*0.5,
+    "CUNIT1": "arcsec",
+    "CTYPE1": "HPLN-TAN",
+    "CDELT2": scale,
+    "NAXIS2": bins,
+    "CRVAL2": 0.,
+    "CRPIX2": bins*0.5 + 0.5,
+    "CUNIT2": "arcsec",
+    "CTYPE2": "HPLT-TAN",
+    "HGLT_OBS": 0,
+    "HGLN_OBS": 0,
+    "RSUN_OBS": sun.solar_semidiameter_angular_size(mid_obs_time).value,
+    "RSUN_REF": sun.constants.radius.value,
+    # Assumes dsun_obs in m if don't specify the units, so give units
+    "DSUN_OBS": get_sunearth_distance(mid_obs_time).value*u.astrophys.au
+    }
+    # For some reason the DSUN_OBS crashed the save...
+    
+#    header = sunpy.map.MapMeta(dict_header)
+    header = sunpy.util.MetaDict(dict_header)
 
-	header = sunpy.map.MapMeta(dict_header)
-
-	nustar_map = sunpy.map.Map(H, header)
-	
-	return nustar_map
+    nustar_map = sunpy.map.Map(H, header)
+    
+    return nustar_map
 
 
