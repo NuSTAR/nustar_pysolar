@@ -9,7 +9,7 @@ import astropy.units as u
 import logging
 
 
-def make_sunpy(evtdata, hdr):
+def make_sunpy(evtdata, hdr, norm_map=False):
     """ Make a sunpy map based on the NuSTAR data.
     
     Parameters
@@ -18,6 +18,11 @@ def make_sunpy(evtdata, hdr):
         This should be an hdu.data structure from a NuSTAR FITS file.
 
     hdr: FITS header containing the astrometric information
+
+    Optional keywords
+
+    norm_map: Normalise the map data by the exposure (live) time, so units 
+    of DN/s. Defaults to "False" and DN
     
     Returns
     -------
@@ -27,7 +32,7 @@ def make_sunpy(evtdata, hdr):
     
     """
 
-    from sunpy.coordinates import get_sunearth_distance
+    from sunpy.coordinates import get_sunearth_distance, get_sun_B0
 
     # Parse Header keywords
     for field in hdr.keys():
@@ -65,6 +70,13 @@ def make_sunpy(evtdata, hdr):
 
     H, yedges, xedges = np.histogram2d(y, x, bins=bins, range = [[min_y,max_y], [min_x, max_x]])
 
+    #Normalise the data with the exposure (or live) time?
+    if norm_map is True:
+    	H=H/exp_time
+    	pixluname='DN/s'
+    else:
+    	pixluname='DN'
+
 
     dict_header = {
     "DATE-OBS": mid_obs_time.iso,
@@ -81,7 +93,8 @@ def make_sunpy(evtdata, hdr):
     "CRPIX2": bins*0.5 + 0.5,
     "CUNIT2": "arcsec",
     "CTYPE2": "HPLT-TAN",
-    "HGLT_OBS": 0,
+    "PIXLUNIT": pixluname,
+    "HGLT_OBS": get_sun_B0(mid_obs_time),
     "HGLN_OBS": 0,
     "RSUN_OBS": sun.solar_semidiameter_angular_size(mid_obs_time).value,
     "RSUN_REF": sun.constants.radius.value,
