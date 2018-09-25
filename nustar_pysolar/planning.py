@@ -354,3 +354,135 @@ def sunlight_periods(infile, tstart, tend):
         return -1
     else:
         return in_range
+
+
+def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=False,
+                reg_pref='testbox'):
+    ''' 
+    Code to make a mosaic for a 5x5 tiled array on the Sun.
+    
+    Input:
+    
+    tstart = '2018-05-28T15:37:00'
+    tend = '2018-05-28T23:10:00'
+    
+    positions = make_mosaic(tstart, tend, write_output=True)
+    
+    Optional flags:
+    
+    write_output = [False] / True
+        Write the output pointing positions in NuSTAR SOC readable formats in 'outfile' for all of the pointings.
+
+    outfile = ['mosaic.txt']
+        Output file if write_output is used.
+    
+    make_regions: [False] / True
+        Make ds9 region files for each tile so that you can see how the FoV moves with each mosaic location.
+
+    reg_pref: 'testbox'
+        The prefix for the region files. Useful if you want to make this meaningful.
+
+    Output mosaic file has columns of:
+    "Arrive By Time"     RA      DEC   RA_SUN  DEC_SUN
+
+    '''
+    import numpy as np
+    box_pa = get_nustar_roll(orbit[0], 0)
+    pa = box_pa + 90*u.deg
+    
+    print('Step PA', pa)
+
+    base = np.array([-1.45, -0.725, 0, 0.725, 1.45])
+    xsteps = np.append(base, np.flip(base, 0))
+    xsteps = np.append(xsteps, base)
+    xsteps = np.append(xsteps, np.flip(base, 0))
+    xsteps = np.append(xsteps, base)
+
+    ysteps = np.array(np.zeros(5) + 1.45)
+    ysteps = np.append(ysteps, np.zeros(5) + 0.725)
+    ysteps = np.append(ysteps, np.zeros(5))
+    ysteps = np.append(ysteps, np.zeros(5)-0.725)
+    ysteps = np.append(ysteps, np.zeros(5)-1.45)
+
+    
+    dt = (orbit[1] - orbit[0]) / 25.
+
+    print("Orbit start: {} Orbit end: {}".format(orbit[0].isoformat(), orbit[1].isoformat()))
+    print("Dwell per position:", dt)
+    print("")
+    print("NuSTAR Roll Angle to get DET0 in top right {:.02f} deg".format(box_pa.value))
+    print("")
+
+
+    if write_output is True:
+        f = open(outfile, 'w')
+    
+    aim_time = orbit[0]
+    for ind, pair in enumerate(zip(xsteps, ysteps)):
+        arrive_time = aim_time
+        aim_time = aim_time + dt
+        # Rotate to the correct PA angle
+
+        delx = -pair[0]*10/60.
+        dely = pair[1]*10/60
+        
+        offset = [0., 0.]*u.deg
+        sun_pos = get_skyfield_position(aim_time, offset, load_path='../data', parallax_correction=True)
+#        print('Sun time: {} RA (deg): {} Dec (deg): {}'.format(aim_time.isoformat(), sun_pos[0], sun_pos[1]))
+        
+        offset = [-delx,dely]*u.deg
+        sky_pos = get_skyfield_position(aim_time, offset, load_path='../data', parallax_correction=True)
+#        print('Arrive time: {} RA (deg): {} Dec (deg): {}'.format(arrive_time.isoformat(), sky_pos[0], sky_pos[1]))
+
+        if make_regions:
+            make_test_region(sky_pos[0], sky_pos[1], box_pa, sun_pos[0], sun_pos[1],box_pa, outname=reg_pref+'{}.reg'.format(ind))
+        if write_output:            
+            f.write('{0} {1:.4f} {2:.4f} {3:.4f} {4:.4f}\n'.format(arrive_time.strftime('%Y:%j:%H:%M:%S'),
+                                                   sky_pos[0].value, sky_pos[1].value,
+                                                    sun_pos[0].value, sun_pos[1].value))
+
+    if write_output:
+        f.close()
+
+
+def make_test_region(boxra, boxdec, boxpa, sunra, sundec, sunpa, outname='testbox.reg'):
+    ''' 
+    Code to produce a ds9 region file showing the Sun and the FoV on the sky.
+    
+    Inputs:
+    
+    boxra, boxdec: These are the center of the FoV. Must have astropy units.
+    boxpa: This is the SKY PA angle. Must have astropy units.
+    
+    sunra, sundec: The center of the Sun.
+    sunpa: The solar north pole angle
+    
+    outname: the name of the region file that you want to produce.
+    Defaults to 'tetsbox.reg'
+
+    The output is a ds9 region file. Go into ds9, enter the Sun ra/dec coordinates and
+    load an optical stellar background field (under the 'Analysis' tab), then load
+    the region file to see what's going on.
+
+    '''   
+    f = open(outname, 'w')
+    f.write("# Region file format: DS9 version 4.1\n")
+    f.write('global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 \
+source=1 \n')
+    f.write('fk5 \n')
+    
+    outstring = 'box({0}, {1}, 720", 720", {2})'.format(boxra.value, boxdec.value, boxpa.value+90 % 360)
+    f.write(outstring+'\n')
+    
+    outstring = 'circle({0}, {1}, 960.5")'.format(sunra.value, sundec.value)
+
+
+    f.write(outstring+'\n')
+
+    outstring = 'vector({0}, {1}, 960.5", {2})'.format(sunra.value, sundec.value, sunpa.value+90 % 360 )
+    f.write(outstring+'\n')
+
+    f.close
+    return
+
+
