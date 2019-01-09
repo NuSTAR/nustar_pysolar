@@ -357,7 +357,7 @@ def sunlight_periods(infile, tstart, tend):
 
 
 def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=False,
-                reg_pref='testbox', extra_roll=0.*u.deg):
+                reg_pref='testbox', extra_roll=0.*u.deg, write_sun=False):
     ''' 
     Code to make a mosaic for a 5x5 tiled array on the Sun.
     
@@ -446,10 +446,15 @@ def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=Fa
 
         if make_regions:
             make_test_region(sky_pos[0], sky_pos[1], box_pa, sun_pos[0], sun_pos[1],sun_pa, outname=reg_pref+'{}.reg'.format(ind))
-        if write_output:            
-            f.write('{0} {1:.4f} {2:.4f} {3:.4f} {4:.4f}\n'.format(arrive_time.strftime('%Y:%j:%H:%M:%S'),
-                                                   sky_pos[0].value, sky_pos[1].value,
-                                                    sun_pos[0].value, sun_pos[1].value))
+        if write_output:
+            if write_sun:
+                f.write('{0} {1:.4f} {2:.4f} {3:.4f} {4:.4f}\n'.format(arrive_time.strftime('%Y:%j:%H:%M:%S'),
+                                                       sky_pos[0].value, sky_pos[1].value,
+                                                        sun_pos[0].value, sun_pos[1].value))
+            else:
+                f.write('{0} {1:.4f} {2:.4f} \n'.format(arrive_time.strftime('%Y:%j:%H:%M:%S'),
+                                       sky_pos[0].value, sky_pos[1].value))
+
 
     if write_output:
         f.close()
