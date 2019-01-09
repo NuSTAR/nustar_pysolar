@@ -357,7 +357,7 @@ def sunlight_periods(infile, tstart, tend):
 
 
 def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=False,
-                reg_pref='testbox'):
+                reg_pref='testbox', extra_roll=0.*u.deg, write_sun=False):
     ''' 
     Code to make a mosaic for a 5x5 tiled array on the Sun.
     
@@ -387,10 +387,10 @@ def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=Fa
 
     '''
     import numpy as np
-    box_pa = get_nustar_roll(orbit[0], 0)
+    box_pa = get_nustar_roll(orbit[0], extra_roll)
+    sun_pa = get_nustar_roll(orbit[0], 0.)
     pa = box_pa + 90*u.deg
     
-    print('Step PA', pa)
 
     base = np.array([-1.45, -0.725, 0, 0.725, 1.45])
     xsteps = np.append(base, np.flip(base, 0))
@@ -404,13 +404,19 @@ def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=Fa
     ysteps = np.append(ysteps, np.zeros(5)-0.725)
     ysteps = np.append(ysteps, np.zeros(5)-1.45)
 
+
+    # Rotation matrix for a clockwise rotation on the solar disk:
+    rotMatrix = np.array([[np.cos(extra_roll), np.sin(extra_roll)],
+                         [-np.sin(extra_roll),  np.cos(extra_roll)]])
+
     
     dt = (orbit[1] - orbit[0]) / 25.
 
     print("Orbit start: {} Orbit end: {}".format(orbit[0].isoformat(), orbit[1].isoformat()))
-    print("Dwell per position:", dt)
+    print("Dwell per position:", dt.total_seconds())
     print("")
-    print("NuSTAR Roll Angle to get DET0 in top right {:.02f} deg".format(box_pa.value))
+    print("NuSTAR Roll Angle to get roll relative to Sun of {:.02f} is {:.02f} deg".format(extra_roll.value, box_pa.value))
+    print("Step of FOV PA direction is {:.02f} deg".format(pa.value))
     print("")
 
 
@@ -421,25 +427,34 @@ def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=Fa
     for ind, pair in enumerate(zip(xsteps, ysteps)):
         arrive_time = aim_time
         aim_time = aim_time + dt
-        # Rotate to the correct PA angle
-
-        delx = -pair[0]*10/60.
-        dely = pair[1]*10/60
         
+        
+        # Make this 10-arcmin steps.
+        step_size = 10 * u.arcmin
+
+        
+        # Sun-center location:
         offset = [0., 0.]*u.deg
         sun_pos = get_skyfield_position(aim_time, offset, load_path='../data', parallax_correction=True)
 #        print('Sun time: {} RA (deg): {} Dec (deg): {}'.format(aim_time.isoformat(), sun_pos[0], sun_pos[1]))
         
-        offset = [-delx,dely]*u.deg
+        # Pointing location        
+        # Rotate to the correct orientation on the solar disk:
+        offset = (np.dot(pair, rotMatrix) * step_size).to(u.deg)        
         sky_pos = get_skyfield_position(aim_time, offset, load_path='../data', parallax_correction=True)
 #        print('Arrive time: {} RA (deg): {} Dec (deg): {}'.format(arrive_time.isoformat(), sky_pos[0], sky_pos[1]))
 
         if make_regions:
-            make_test_region(sky_pos[0], sky_pos[1], box_pa, sun_pos[0], sun_pos[1],box_pa, outname=reg_pref+'{}.reg'.format(ind))
-        if write_output:            
-            f.write('{0} {1:.4f} {2:.4f} {3:.4f} {4:.4f}\n'.format(arrive_time.strftime('%Y:%j:%H:%M:%S'),
-                                                   sky_pos[0].value, sky_pos[1].value,
-                                                    sun_pos[0].value, sun_pos[1].value))
+            make_test_region(sky_pos[0], sky_pos[1], box_pa, sun_pos[0], sun_pos[1],sun_pa, outname=reg_pref+'{}.reg'.format(ind))
+        if write_output:
+            if write_sun:
+                f.write('{0} {1:.4f} {2:.4f} {3:.4f} {4:.4f}\n'.format(arrive_time.strftime('%Y:%j:%H:%M:%S'),
+                                                       sky_pos[0].value, sky_pos[1].value,
+                                                        sun_pos[0].value, sun_pos[1].value))
+            else:
+                f.write('{0} {1:.4f} {2:.4f} \n'.format(arrive_time.strftime('%Y:%j:%H:%M:%S'),
+                                       sky_pos[0].value, sky_pos[1].value))
+
 
     if write_output:
         f.close()
