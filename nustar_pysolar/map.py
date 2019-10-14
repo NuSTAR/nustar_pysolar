@@ -46,7 +46,7 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
             if hdr[field] == 'Y':
 #                 print(hdr[field][5:8])
                 yval = field[5:8]
-        
+
     min_x= hdr['TLMIN'+xval]
     min_y= hdr['TLMIN'+yval]
     max_x= hdr['TLMAX'+xval]
@@ -102,7 +102,8 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
     "CRPIX2": bins*0.5 + 0.5,
     "CUNIT2": "arcsec",
     "CTYPE2": "HPLT-TAN",
-    "PIXLUNIT": pixluname,\
+    "PIXLUNIT": pixluname,
+    "DETECTOR":"NuSTAR",
 #    SunPy v1+ version
     "HGLT_OBS": sunpy.coordinates.sun.B0(mid_obs_time),
 #    SunPy <v1 version        
