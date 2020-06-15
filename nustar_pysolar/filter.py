@@ -73,6 +73,26 @@ def by_energy(evtdata, energy_low=2.5, energy_high=10.):
     
     return goodinds
 
+def by_det(evtdata, det_id=0):
+    """ Apply Det filtering to the data.
+    
+    Parameters
+    ----------
+    evtdata: FITS data class
+        This should be an hdu.data structure from a NuSTAR FITS file.
+        
+    det_id: int 
+        Values of 0,1,2 or 3
+        Defaults to 0
+
+
+    """     
+    det_filter = (evtdata['DET_ID'] == det_id)
+    inds = (det_filter).nonzero()
+    goodinds=inds[0]
+    
+    return goodinds
+
 
 def by_xy(evtdata, hdr, xy_range):
     """ Apply position filtering to the data.
@@ -166,7 +186,7 @@ def gradezero(evtdata):
     return goodinds
 
 def event_filter(evtdata, fpm='FPMA',
-    energy_low=2.5, energy_high=10,hdr=0,xy_range=0,time_range=0):
+    energy_low=2.5, energy_high=10,hdr=0,xy_range=0,time_range=0,dets_id=[]):
     """ All in one filter module. By default applies an energy cut, 
         selects only events with grade == 0, and removes known hot pixel.
         
@@ -200,7 +220,11 @@ def event_filter(evtdata, fpm='FPMA',
         
     time_range: astropy.time format 2 elements
         Min, max time range to consider, in astropy time format
-        Default not used, needs hdr to be supplied    
+        Default not used, needs hdr to be supplied 
+        
+    dets_id: int list up to 4 elements
+        Which dets (0,1,2 and/or 3) to include
+        Defaults to using all dets
 
     Returns
     -------
@@ -216,8 +240,15 @@ def event_filter(evtdata, fpm='FPMA',
     goodinds = gradezero(evt_energy)
     cleanevt = evt_energy[goodinds]
     
-#   New filters for time and postion - work in progress
-#   position working, time to come
+#   New filter for specific dets
+    if (len(dets_id) > 0):
+        goodinds=np.array([],dtype='int')
+        for dd in dets_id:
+            gi_temp=by_det(cleanevt,det_id=dd)
+            goodinds=np.append(goodinds,gi_temp)
+        cleanevt=cleanevt[goodinds]
+    
+#   New filters for time and postion 
     if hdr != 0 :
 #         Only do xy filtering if specified
         if (xy_range != 0):

@@ -75,8 +75,6 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
     resample = 1.0
     scale = delx * resample
     bins = (max_x - min_x) / (resample)
-    
-    print(bins,min_y,max_y)
 
 #   numpy error that histogram2d needs integer number of bins -> fixed  
     H, yedges, xedges = np.histogram2d(y, x, bins=int(bins), range = [[min_y,max_y], [min_x, max_x]])
