@@ -121,7 +121,7 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
 ###       
     # Assumes dsun_obs in m if don't specify the units, so give units
 #    SunPy v1+ version        
-    "DSUN_OBS": sunpy.coordinates.sun.earth_distance(mid_obs_time).value*u.astrophys.au
+    "DSUN_OBS": sunpy.coordinates.sun.earth_distance(mid_obs_time).to('AU')
     #    SunPy <v1 version    
 #     "DSUN_OBS": sunpy.coordinates.get_sunearth_distance(mid_obs_time).value*u.astrophys.au
     }
@@ -132,5 +132,4 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
     nustar_map = sunpy.map.Map(H, header)
     
     return nustar_map
-
 
