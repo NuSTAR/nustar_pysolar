@@ -1,9 +1,7 @@
-numpy
-scipy
+sunpy>=2.0
 matplotlib
-sunpy>=0.8.1
-sphinx=1.5.6
+sphinx
 skyfield
-jplephem
-sgp4
-
+jupyter
+pytest
+pytest-astropy
