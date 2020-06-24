@@ -1,8 +1,10 @@
 import astropy.time
 import astropy.units as u
 from astropy.coordinates import get_sun
-import sunpy.map
-from sunpy import sun
+# don't think the following is needed
+# import sunpy.map
+# don't think the following is needed
+# from sunpy import sun
 import numpy as np
 
 
@@ -25,7 +27,10 @@ def _get_sun_pos(met):
     sun_pos:
         Index of evtdata that passes the filtering.
     """ 
-    from sunpy.coordinates import get_sun_P
+    # Deprecated from sunpy v1 onwards
+#     from sunpy.coordinates import get_sun_P
+#  Use new version instead
+    from sunpy.coordinates import sun
 
     sun_time = astropy.time.Time(met, format = 'mjd')
     astro_sun_pos = get_sun(sun_time)
@@ -34,7 +39,8 @@ def _get_sun_pos(met):
     sun_pos = np.array([astro_sun_pos.ra.deg, astro_sun_pos.dec.deg])* u.deg
 
     # Solar NP roll angle:
-    sun_np = get_sun_P(last_met)
+#     sun_np = get_sun_P(last_met)
+    sun_np = sun.P(last_met)
 
     return sun_pos, sun_np;
 
@@ -167,8 +173,13 @@ def _delta_solar_skyfield(ra_x, dec_y, met, **kwargs):
     """
     import astropy.units as u
     from nustar_pysolar.utils import skyfield_ephem
-    from sunpy import sun
-    from sunpy.coordinates import get_sun_P
+#      Don't think this is needed
+#     from sunpy import sun
+    # Deprecated from sunpy v1 onwards
+#     from sunpy.coordinates import get_sun_P
+#  Use new version instead
+    from sunpy.coordinates import sun
+    
     
     # How often you want to update the solar ephemeris:
     tStep=kwargs.get('tStep', 5.0)
@@ -206,8 +217,8 @@ def _delta_solar_skyfield(ra_x, dec_y, met, **kwargs):
             sun_pos = np.array([this_ra.to(u.deg).value,
                 this_dec.to(u.deg).value])*u.deg
 
-            
-            sun_np = get_sun_P(last_met)
+#             sun_np = get_sun_P(last_met)
+            sun_np = sun.P(last_met)
 
             # Rotation matrix for a counter-clockwise rotation since we're going
             # back to celestial north from solar north

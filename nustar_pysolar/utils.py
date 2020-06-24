@@ -82,7 +82,8 @@ def skyfield_ephem(load_path=None, parallax_correction=False, utc=None):
     # Initialize Skyfield ephemeris tools.
     from skyfield.api import EarthSatellite, Loader
     from astropy.time import Time
-    import sunpy.sun
+    #   Not actually used? So just comment out, and so no sunpy v1 issue  
+#     import sunpy.sun
 
     if load_path is None:
         load_path = './'

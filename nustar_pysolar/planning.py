@@ -38,7 +38,9 @@ def get_sky_position(time, offset):
 
     from astropy.coordinates import get_sun
     from astropy.time import Time
-    from sunpy import sun
+#     Replaced with newer sunpy v1 function
+#     from sunpy import sun
+    from sunpy.coordinates import sun
 
     # Convert the date into something that's usable by astropy.
 
@@ -53,7 +55,9 @@ def get_sky_position(time, offset):
     astro_sun_pos = get_sun(astro_time)
 
     # Get the solar north pole angle. cgs --> radians
-    sun_np=sun.solar_north(t=time).cgs
+#     Update for sunpy v1.0+
+#     sun_np=sun.solar_north(t=time).cgs
+    sun_np=sun.P(time).cgs
 
     # Get the center of the Sun, and assign it degrees.
     # Doing it this was is necessary to do the vector math below.
@@ -115,22 +119,26 @@ def get_skyfield_position(time, offset, load_path=None, parallax_correction=Fals
     """
 
     from astropy.time import Time
-    import sunpy.sun
+#     Replaced with newer sunpy v1 function
+#     from sunpy import sun
+    from sunpy.coordinates import sun
     from nustar_pysolar.utils import skyfield_ephem
     start_date = parse_time(time)
     utc = Time(start_date)
 
-    observer, sun, ts = skyfield_ephem(load_path=load_path,
+    observer, sunephem, ts = skyfield_ephem(load_path=load_path,
                                         parallax_correction=parallax_correction,
                                         utc=utc)
 
     tcheck = ts.from_astropy(utc)
-    geocentric = observer.at(tcheck).observe(sun)
+    geocentric = observer.at(tcheck).observe(sunephem)
     this_ra_geo, this_dec_geo, dist = geocentric.radec()
 
 
     # Get the solar north pole angle. cgs --> radians
-    sun_np = sunpy.sun.solar_north(t=time).cgs
+#     sun_np = sunpy.sun.solar_north(t=time).cgs
+    #     Update for sunpy v1.0+
+    sun_np=sun.P(time).cgs
 
     # Get the center of the Sun, and assign it degrees.
     # Doing it this was is necessary to do the vector math below.
@@ -183,10 +191,14 @@ def get_nustar_roll(time, angle):
     
     """
 
-    from sunpy import sun
+#     Replaced with newer sunpy v1 function
+#     from sunpy import sun
+    from sunpy.coordinates import sun
 
     # Get the solar north pole angle. cgs --> radians
-    sun_np=sun.solar_north(t=time).deg * u.deg
+#     sun_np=sun.solar_north(t=time).deg * u.deg
+    #     Update for sunpy v1.0+
+    sun_np=sun.P(time).deg*u.deg
 
     nustar_roll = np.mod(sun_np + angle, 360*u.deg)
 
