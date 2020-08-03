@@ -10,7 +10,7 @@ import astropy.units as u
 import logging
 
 
-def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
+def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False,shevt_xy=[0,0]):
     """ Make a sunpy map based on the NuSTAR data.
     
     Parameters
@@ -30,6 +30,10 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
     norm_map: Normalise the map data by the exposure time (i.e. livetime), 
         giving map in units of DN/s. Defaults to "False" and units of DN
     
+    shevt_xy: 2 element array of x and y arcsec shift to apply to 
+    	evtdata before making the map (does to nearest pixel),
+    	defaults to [0,0], so no shift
+    
     Returns
     -------
 
@@ -38,7 +42,7 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
     
     """
     # Parse Header keywords
-    for field in hdr.keys():
+    for field in list(hdr.keys()):
         if field.find('TYPE') != -1:
             if hdr[field] == 'X':
 #                 print(hdr[field][5:8])
@@ -57,6 +61,10 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
 
     x = evtdata['X'][:]
     y = evtdata['Y'][:]
+    # Apply a shift to the data - default is 0
+    x = x + round(shevt_xy[0]/delx)
+    y = y + round(shevt_xy[1]/dely)
+
     met = evtdata['TIME'][:]*u.s
     mjdref=hdr['MJDREFI']
 
@@ -105,29 +113,15 @@ def make_sunpy(evtdata, hdr, exp_time=0,on_time=0,norm_map=False):
     "CTYPE2": "HPLT-TAN",
     "PIXLUNIT": pixluname,
     "DETECTOR":"NuSTAR",
-#    SunPy v1+ version
-    "HGLT_OBS": sunpy.coordinates.sun.B0(mid_obs_time),
-#    SunPy <v1 version        
-#   "HGLT_OBS": sunpy.coordinates.get_sun_B0(mid_obs_time),
+    "HGLT_OBS": sunpy.coordinates.sun.B0(mid_obs_time).value,
     "HGLN_OBS": 0,
-#    SunPy v1+ version
+#    previous form (i.e. -4d41m42.2166s, instead of -4.695060153501252) save to fits crashed
     "RSUN_OBS": sunpy.coordinates.sun.angular_radius(mid_obs_time).value,
-#    SunPy <v1 version
-#    "RSUN_OBS": sun.solar_semidiameter_angular_size(mid_obs_time).value,
-##        
-#    sun.constants will stay in SunPy v1+ ? just sun.sun being depreciated?
-#      https://docs.sunpy.org/en/stable/code_ref/sun.html#module-sunpy.sun.models
-    "RSUN_REF": sunpy.sun.constants.radius.value,
-###       
-    # Assumes dsun_obs in m if don't specify the units, so give units
-#    SunPy v1+ version        
-    "DSUN_OBS": sunpy.coordinates.sun.earth_distance(mid_obs_time).to('AU')
-    #    SunPy <v1 version    
-#     "DSUN_OBS": sunpy.coordinates.get_sunearth_distance(mid_obs_time).value*u.astrophys.au
+    "RSUN_REF": sunpy.sun.constants.radius.value,   
+    # again need in m, not AU or save to fits crashed
+    "DSUN_OBS": sunpy.coordinates.sun.earth_distance(mid_obs_time).to_value('m')
     }
-    # For some reason the DSUN_OBS crashed the save...
-    
-#    header = sunpy.map.MapMeta(dict_header)
+
     header = sunpy.util.MetaDict(dict_header)
     nustar_map = sunpy.map.Map(H, header)
     
