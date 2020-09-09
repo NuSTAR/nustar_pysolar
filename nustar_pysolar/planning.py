@@ -424,7 +424,7 @@ def make_mosaic(orbit, outfile='mosaic.txt', write_output=False, make_regions=Fa
     
     dt = (orbit[1] - orbit[0]) / 25.
 
-    print("Orbit start: {} Orbit end: {}".format(orbit[0].isoformat(), orbit[1].isoformat()))
+    print("Orbit start: {} Orbit end: {}".format(orbit[0].iso, orbit[1].iso))
     print("Dwell per position:", dt.total_seconds())
     print("")
     print("NuSTAR Roll Angle to get roll relative to Sun of {:.02f} is {:.02f} deg".format(extra_roll.value, box_pa.value))
