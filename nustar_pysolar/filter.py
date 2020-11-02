@@ -186,7 +186,8 @@ def gradezero(evtdata):
     return goodinds
 
 def event_filter(evtdata, fpm='FPMA',
-    energy_low=2.5, energy_high=10,hdr=0,xy_range=0,time_range=0,dets_id=[]):
+    energy_low=2.5, energy_high=10,hdr=0,xy_range=0,time_range=0,
+                 dets_id=[],no_grade_filter=False,no_bad_pix_filter=False):
     """ All in one filter module. By default applies an energy cut, 
         selects only events with grade == 0, and removes known hot pixel.
         
@@ -225,6 +226,14 @@ def event_filter(evtdata, fpm='FPMA',
     dets_id: int list up to 4 elements
         Which dets (0,1,2 and/or 3) to include
         Defaults to using all dets
+        
+    no_bad_pix_filter: bool True or False
+        Don't filter the bad pixels
+        Default is False (so does filter bad pixels)  
+        
+    no_grade_filter: bool True or False
+        Return all grades, not just grade == 0
+        Default is False (so does return grade ==0)
 
     Returns
     -------
@@ -232,15 +241,26 @@ def event_filter(evtdata, fpm='FPMA',
     cleanevt: FITS data class.
         This is the subset of evtdata that pass the data selection cuts.
     """
-    goodinds = bad_pix(evtdata, fpm=fpm)
-    evt_badfilter = evtdata[goodinds]
+#   Option to not filter out the bad pixels
+    if no_bad_pix_filter == False:
+        goodinds = bad_pix(evtdata, fpm=fpm)
+        evt_badfilter = evtdata[goodinds]
+    else:
+        evt_badfilter = evtdata
+    
+#   Filter by energy
     goodinds = by_energy(evt_badfilter,
                          energy_low=energy_low, energy_high = energy_high)
     evt_energy = evt_badfilter[goodinds]
-    goodinds = gradezero(evt_energy)
-    cleanevt = evt_energy[goodinds]
     
-#   New filter for specific dets
+#   Option to not filter the grades
+    if no_grade_filter == False:
+        goodinds = gradezero(evt_energy)
+        cleanevt = evt_energy[goodinds]
+    else:
+        cleanevt = evt_energy 
+    
+#   Filter for specific dets
     if (len(dets_id) > 0):
         goodinds=np.array([],dtype='int')
         for dd in dets_id:
@@ -248,13 +268,13 @@ def event_filter(evtdata, fpm='FPMA',
             goodinds=np.append(goodinds,gi_temp)
         cleanevt=cleanevt[goodinds]
     
-#   New filters for time and postion 
+#   Filters for time and postion 
     if hdr != 0 :
-#         Only do xy filtering if specified
+#       Only do xy filtering if specified
         if (xy_range != 0):
             goodinds=by_xy(cleanevt,hdr,xy_range)
             cleanevt=cleanevt[goodinds]
-#         Only do time filtering if specified
+#       Only do time filtering if specified
         if (time_range != 0):
             goodinds=by_time(cleanevt,hdr,time_range)
             cleanevt=cleanevt[goodinds]
