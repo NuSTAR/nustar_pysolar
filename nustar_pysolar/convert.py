@@ -40,7 +40,7 @@ def _get_sun_pos(met):
 
     # Solar NP roll angle:
 #     sun_np = get_sun_P(last_met)
-    sun_np = sun.P(last_met)
+    sun_np = sun.P(met)
 
     return sun_pos, sun_np;
 
