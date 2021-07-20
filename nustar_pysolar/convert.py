@@ -255,6 +255,14 @@ def _delta_solar_skyfield(ra_x, dec_y, met, **kwargs):
 
 
 def to_solar(evtdata, hdr, **kwargs):
+    import astropy.time
+    import astropy.units as u
+    from astropy.coordinates import get_sun
+    # don't think the following is needed
+    # import sunpy.map
+    # don't think the following is needed
+    # from sunpy import sun
+    import numpy as np
     """ Main script to convert the events to solar coordinates.
 
         Inputs:
@@ -287,7 +295,7 @@ def to_solar(evtdata, hdr, **kwargs):
 
 
     # Parse the header information to get the native bin size
-    for field in hdr.keys():
+    for field in list(hdr.keys()):
         if field.find('TYPE') != -1:
             if hdr[field] == 'X':
 #                print(hdr[field][5:8])
@@ -312,20 +320,89 @@ def to_solar(evtdata, hdr, **kwargs):
     # Make image coordinates
     out_sun_x=(1.0)*(sun_x / delx) + x0
     out_sun_y=(sun_y / dely) + y0
-    tbldata['X'] = out_sun_x
-    tbldata['Y'] = out_sun_y
+    #     tbldata['X'] = out_sun_x                               **Removed
+    #     tbldata['Y'] = out_sun_y                               **Removed
 
-    # Update header information
-    outhdr['TCRVL'+xval] = 0.
-    outhdr['TCRPX'+xval] = x0
-    outhdr['TCDLT'+xval] = 1.0 * delx.to(u.arcsec).value
+    #     #Update header information                             **Removed
+    #     outhdr['TCRVL'+xval] = 0.                              **Removed
+    #     outhdr['TCRPX'+xval] = x0                              **Removed
+    #     outhdr['TCDLT'+xval] = 1.0 * delx.to(u.arcsec).value   **Removed
+    #     outhdr['TLMAX'+xval] = maxX                            **Removed
+    #     outhdr['TCRVL'+yval] = 0.                              **Removed
+    #     outhdr['TCRPX'+yval] = x0                              **Removed
+    #     outhdr['TCDLT'+yval] = dely.to(u.arcsec).value         **Removed
+    #     outhdr['TLMAX'+yval] = maxY                            **Removed
+    
+    #     return tbldata, outhdr                                 **Removed
+    
+    #**************************** added ***************************************************
+    
+    # Astropy update (>3. I think) means that the keywords
+    # that we need to change are now protected.
+    # This means that they are now determined from the data
+    # columns and can't just be reassigned.
+    # **See: https://github.com/astropy/astropy/issues/7145
+    # This is why lines 70--78 were removed.
+    
+    from astropy.io import fits
+    # Remove the keywords so they don't have to be saved out to be updated.
+    del outhdr['TCRVL'+xval]
+    del outhdr['TCRPX'+xval]
+    del outhdr['TCDLT'+xval] 
+    
+    del outhdr['TCRVL'+yval] 
+    del outhdr['TCRPX'+yval] 
+    del outhdr['TCDLT'+yval] 
+    
+    # These ones can still be changed the old way for some reason.
     outhdr['TLMAX'+xval] = maxX
-    outhdr['TCRVL'+yval] = 0.
-    outhdr['TCRPX'+yval] = x0
-    outhdr['TCDLT'+yval] = dely.to(u.arcsec).value
     outhdr['TLMAX'+yval] = maxY
+    
+    # Get columns from the data
+    orig_cols = tbldata.columns
+    
+    # Make new columns for the solar position coordinates in the X and Y fields.
+    # This method won't overwrite the X and Y fields if they are already there. 
+    # This is why line 67 and 68 were removed.
+    # To create the columns, the fooloowing format is used.
+    # **See: https://docs.astropy.org/en/stable/io/fits/usage/table.html
+    # fits.Column(name=TTYPE, format=TFORM, unit=TUNIT, null=TNULL, 
+    #             coord_ref_point=TCRPX, coord_ref_value=TCRVL, coord_inc=TCDLT, 
+    #             coord_type=TCTYP, coord_unit=TCUNI,
+    #             array=data)
+    
+    # Remove the RA---DEC X and Y data fields from the original columns
+    orig_cols.del_col('X')
+    orig_cols.del_col('Y')
+    
+    # Now create the new columns which contain the keywords we
+    # need as well as the solar X and Y coordinates
+    new_cols = fits.ColDefs([fits.Column(name='X', format='1I', unit='pixel', null=-1, 
+                                         coord_ref_point=x0, coord_ref_value=0., 
+                                         coord_inc=1.0 * delx.to(u.arcsec).value, 
+                                         coord_type="Heliopro", coord_unit="arcsec",
+                                         array=out_sun_x),
+                             fits.Column(name='Y', format='1I', unit='pixel', null=-1, 
+                                         coord_ref_point=y0, coord_ref_value=0., 
+                                         coord_inc=dely.to(u.arcsec).value, 
+                                         coord_type="Heliopro", coord_unit="arcsec",
+                                         array=out_sun_y)])
+    
+    # Combine the old and new columns to create a new hdu structure
+    hdu = fits.BinTableHDU.from_columns(orig_cols + new_cols)
+    
+    # separate the new hdu intp its data and header components
+    # to be able to be consistent with to_solar()
+    new_tbldata, hdr_from_new_columns = hdu.data, hdu.header
+    
+    # return the new table data, but also combine the original header with the new updated one
+    return new_tbldata, outhdr + hdr_from_new_columns
 
-    return tbldata, outhdr  
+
+
+
+
+
 
 
 
