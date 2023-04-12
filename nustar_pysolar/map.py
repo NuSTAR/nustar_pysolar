@@ -10,7 +10,8 @@ import astropy.units as u
 import logging
 
 
-def make_sunpy(evtdata, hdr, exp_time=0, on_time=0, norm_map=False, shevt_xy=(0,0)*u.arcsec):
+def make_sunpy(evtdata, hdr, exp_time=0, on_time=0, norm_map=False, 
+               shevt_xy=(0,0)*u.arcsec, ssw_legacy=False):
     """ Make a sunpy map based on the NuSTAR data.
     
     Parameters
@@ -33,6 +34,9 @@ def make_sunpy(evtdata, hdr, exp_time=0, on_time=0, norm_map=False, shevt_xy=(0,
     shevt_xy: 2 element array of x and y shift to apply to 
     	evtdata before making the map (does to nearest pixel),
     	defaults to [0,0], so no shift
+
+    ssw_legacy: Using evt converted to S/C via older sswidl code,
+            which might need to specify CUNIT1 and CUNIT2. Defaults to "False"
     
     Returns
     -------
@@ -96,6 +100,12 @@ def make_sunpy(evtdata, hdr, exp_time=0, on_time=0, norm_map=False, shevt_xy=(0,
     else:
         pixluname = 'DN'
 
+    # Working with older sswidl converted evt?
+    if ssw_legacy is True:
+        cunit = "arcsec"
+    else:
+        cunit = scale.unit.to_string()
+
     dict_header = {
         # Change to the start time of the obs, not the mid_time?
         "DATE-OBS": sta_obs_time.iso,#mid_obs_time.iso,
@@ -105,13 +115,13 @@ def make_sunpy(evtdata, hdr, exp_time=0, on_time=0, norm_map=False, shevt_xy=(0,
         "NAXIS1": bins,
         "CRVAL1": 0.,
         "CRPIX1": bins*0.5,
-        "CUNIT1": scale.unit.to_string(),
+        "CUNIT1": cunit,
         "CTYPE1": "HPLN-TAN",
         "CDELT2": scale.value,
         "NAXIS2": bins,
         "CRVAL2": 0.,
         "CRPIX2": bins*0.5 + 0.5,
-        "CUNIT2": scale.unit.to_string(),
+        "CUNIT2": cunit,
         "CTYPE2": "HPLT-TAN",
         "PIXLUNIT": pixluname,
         "DETECTOR":"NuSTAR",
