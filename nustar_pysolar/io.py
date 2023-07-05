@@ -46,7 +46,7 @@ def download_occultation_times(outdir='./'):
     myname='nustar_pysolar.planning'
     import wget
     
-    url='http://hessi.ssl.berkeley.edu/ground_systems/products/NUSTAR/'
+    url='https://ops-srvr.ssl.berkeley.edu/ground_systems/products//NUSTAR/'
     url+=year_doy+'/'
     fname='NUSTAR.'+year_doy+'.SHADOW_ANALYSIS.txt' 
     url+=fname
