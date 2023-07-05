@@ -1,0 +1,7 @@
+numpy
+astropy
+scipy
+sunpy>=2.0
+matplotlib
+skyfield
+wget

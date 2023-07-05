@@ -1,0 +1,31 @@
+[project]
+name = "nustar_pysolar"
+description = "NuSTAR Solar Utilites"
+readme = "README.rst"
+authors = [
+    { name = "Brian Grefenstette", email = "bwgref@srl.caltech.edu" }
+]
+license = { text = "BSD 3-Clause License" }
+dependencies = [
+    "numpy",
+    "astropy",
+    "scipy",
+    "sunpy>=2.0",
+    "matplotlib",
+    "skyfield",
+    "jupyterlab",
+    "pytest",
+    "wget",
+    "pytest-astropy"
+]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://link-to-your-project"
+
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm"]
+build-backend = 'setuptools.build_meta'
+
+[tool.setuptools]
+packages = ["nustar_pysolar"]
