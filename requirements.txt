@@ -1,7 +1,0 @@
-sunpy>=2.0
-matplotlib
-sphinx
-skyfield
-jupyter
-pytest
-pytest-astropy
