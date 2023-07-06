@@ -80,7 +80,7 @@ You can search the `NuMASTER table <https://heasarc.gsfc.nasa.gov/db-perl/W3Brow
 
 
 
-.. image:: https://readthedocs.org/projects/nustar-pysolar/badge/?version=latest
+.. |Readthedocs| image:: https://readthedocs.org/projects/nustar-pysolar/badge/?version=latest
     :target: https://nustar-pysolar.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
     
