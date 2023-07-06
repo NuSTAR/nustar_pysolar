@@ -80,4 +80,10 @@ You can search the `NuMASTER table <https://heasarc.gsfc.nasa.gov/db-perl/W3Brow
 
 
 
-
+.. image:: https://readthedocs.org/projects/nustar-pysolar/badge/?version=latest
+    :target: https://nustar-pysolar.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+    
+.. |Astropy| image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+    :target: http://www.astropy.org
+    :alt: Powered by Astropy Badge
